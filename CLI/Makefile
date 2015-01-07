@@ -1,7 +1,13 @@
-interface: linenoise.h linenoise.c
+all: main
 
-interface: linenoise.c interface.c
-	$(CC) -Wall -W -Os -g -o interface linenoise.c interface.c
+main: main.o linenoise.o interface.o
+	gcc -Wall main.o linenoise.o interface.o -o main
+
+interface.o: interface.c
+	gcc -Wall -c interface.c
+
+linenoise.o: linenoise.c
+	gcc -Wall -c linenoise.c
 
 clean:
-	rm -f interface
+	rm -f main *.o
