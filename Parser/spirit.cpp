@@ -36,10 +36,10 @@ namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
 namespace phx = boost::phoenix;
 
-typedef struct monome
+typedef struct localMonome
 {
-	boost::optional<std::string> coefficientBegin;
-	boost::optional<std::string> coefficientEnd;
+	std::string coefficientBegin;
+	std::string coefficientEnd;
 	int x_exponent;
 } internalMonome;
 
@@ -88,15 +88,15 @@ namespace client
 	};
 }
 
-void print(internalMonome monome)
+void print(internalMonome internMonome)
 {
 	std::cout << "new poly term:\n";
-	std::cout << "  coefficientBegin: " << (monome.coefficientBegin->empty() ? "" : *monome.coefficientBegin) << "\n";
-	std::cout << "  coefficientEnd: " << (monome.coefficientEnd->empty() ? "" : *monome.coefficientEnd) << "\n";
-	std::cout << "  x_exponent: " << monome.x_exponent << "\n\n";
+	std::cout << "  coefficientBegin: " << (internMonome.coefficientBegin.empty() ? "" : internMonome.coefficientBegin) << "\n";
+	std::cout << "  coefficientEnd: " << (internMonome.coefficientEnd.empty() ? "" : internMonome.coefficientEnd) << "\n";
+	std::cout << "  x_exponent: " << internMonome.x_exponent << "\n\n";
 }
 
-void parseMonome(std::string str, bool & error)
+monome parseMonome(std::string str, bool & error)
 {
 	client::calculator<std::string::const_iterator> calc;
 	boost::spirit::ascii::space_type space;
@@ -104,18 +104,25 @@ void parseMonome(std::string str, bool & error)
 	std::string::const_iterator begin = str.begin();
 	std::string::const_iterator end = str.end();
 
+	internalMonome internMonome;
+	monome output;
 
-	internalMonome monome;
-
-	bool r = phrase_parse(begin, end, calc, space, monome);
+	bool r = phrase_parse(begin, end, calc, space, internMonome);
 
 	if (r && begin == end)
 	{
+		complexType ending;
+
 		error = false;
+		output.coef = getNumber(internMonome.coefficientBegin);
+		ending = getNumber(internMonome.coefficientEnd);
+
+		output.coef.coefReal += ending.coefReal;
+		output.coef.coefComplex += ending.coefComplex;
 
 		std::cout << "-------------------------\n";
 		std::cout << "Parsing succeeded\n";
-		print(monome);
+		print(internMonome);
 		std::cout << "-------------------------\n";
 	}
 	else
@@ -128,4 +135,6 @@ void parseMonome(std::string str, bool & error)
 		std::cout << "stopped at: \" " << rest << "\"\n";
 		std::cout << "-------------------------\n";
 	}
+
+	return output;
 }

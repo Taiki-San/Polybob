@@ -1,6 +1,6 @@
 #include "parserPrivate.h"
 
-complexType getNumber(std::string string, bool negative, bool &a)
+complexType getNumber(std::string string)
 {
 	complexType complex;
 	size_t size = string.size();
@@ -29,9 +29,6 @@ complexType getNumber(std::string string, bool negative, bool &a)
 	else
 		value = atof(string.c_str());
 
-	if(negative)
-		value *= -1;
-
 	if(haveI == 1)
 		isComplex = true;
 	else
@@ -48,5 +45,3 @@ complexType getNumber(std::string string, bool negative, bool &a)
 
 	return complex;
 }
-
-bool isOperator

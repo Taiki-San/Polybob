@@ -19,10 +19,12 @@ spirit:
 	$(CC) $(FLAGS) -c -o spirit.o spirit.cpp
 	$(CC) $(FLAGS) -c -o logic.o sanitization.cpp
 	$(CC) $(FLAGS) -c -o toolbox.o toolbox.cpp
-	$(CC) $(LINKFLAG) -o main.out main.o logic.o toolbox.o spirit.o
+	$(CC) $(FLAGS) -c -o parsingCore.o parsingCore.cpp
+	$(CC) $(LINKFLAG) -o main.out main.o logic.o toolbox.o spirit.o parsingCore.o
 
 clever:
 	$(CC) $(FLAGS) -c -o main.o base.cpp
 	$(CC) $(FLAGS) -c -o logic.o sanitization.cpp
 	$(CC) $(FLAGS) -c -o toolbox.o toolbox.cpp
-	$(CC) $(LINKFLAG) -o main.out main.o logic.o toolbox.o spirit.o
+	$(CC) $(FLAGS) -c -o parsingCore.o parsingCore.cpp
+	$(CC) $(LINKFLAG) -o main.out main.o logic.o toolbox.o spirit.o parsingCore.o
