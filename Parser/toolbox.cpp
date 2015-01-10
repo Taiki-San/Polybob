@@ -3,10 +3,10 @@
 complexType getNumber(std::string string, bool negative, bool &a)
 {
 	complexType complex;
-	char haveI = 0;
-
 	size_t size = string.size();
 	double value;
+	char haveI = 0;
+	bool isComplex;
 
 	if(string.at(0) == 'i')
 	{
@@ -29,18 +29,24 @@ complexType getNumber(std::string string, bool negative, bool &a)
 	else
 		value = atof(string.c_str());
 
+	if(negative)
+		value *= -1;
+
 	if(haveI == 1)
-		complex.isComplex = true;
+		isComplex = true;
 	else
 	{
-		complex.isComplex = false;
+		isComplex = false;
 		if(haveI == 2)
 			value *= -1;
 	}
 
-	if(negative)
-		value *= -1;
+	if(isComplex)
+		complex.coefComplex = value;
+	else
+		complex.coefReal = value;
 
-	complex.coefficient = value;
 	return complex;
 }
+
+bool isOperator
