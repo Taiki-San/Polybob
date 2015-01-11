@@ -1,6 +1,6 @@
 CC = clang++
 
-BASE_FLAGS  =  -Wall
+BASE_FLAGS  =  -Wall -g
 
 # INCLUDE BASE DIRECTORY AND BOOST DIRECTORY FOR HEADERS
 LDFLAGS = -I/usr/local/Cellar/boost/1.57.0/include -I/opt/local/include
