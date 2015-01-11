@@ -9,52 +9,38 @@ Variables& Variables::Instance()
 
 Variables::Variables()
 {
-	//constructeur normal
+	haveCache = false;
 }
 
 bool Variables::variableName(std::string input, std::string & variableName)
 {
-	std::string::const_iterator iterator = input.begin();
-	size_t posStart = 0, length = 0, curPos;
-	bool entered = false, left = false;
+	std::string rawCache, cacheName;
+	size_t length;
 	
-	for(; iterator != input.end(); ++iterator, ++curPos)
+	//We check the cache
+	if(Variables::getCache(rawCache, cacheName) && rawCache == input)
 	{
-		switch (*iterator)
-		{
-			case ' ':
-				break;
-				
-			case '[':
-			{
-				if(entered)
-					return false;
-				
-				entered = true;
-				posStart = curPos + 1;
-			}
-				
-			case ']':
-			{
-				left = true;
-				length = curPos - posStart;
-			}
-				
-			default:
-			{
-				if(!entered || left)
-					return false;
-			}
-		}
+		variableName = cacheName;
+		return true;
 	}
 	
-	if(*iterator != '[')
+	//If no cache, we get the length, strip the borders
+	length = input.length();
+	
+	if(length <= 2 || input[0] != '[' || input[length - 1] != ']')
 		return false;
 	
-	if(length == 0)
-		return false;
+	variableName = input.substr(1, length - 2);
+
+	//We check if there is no illegal character in the variable name
+	for(std::string::const_iterator iterator = variableName.begin(); iterator != input.end(); ++iterator)
+	{
+		if(*iterator == '[' || *iterator == ']')
+			return false;
+	}
 	
-	variableName = input.substr(posStart, length);
+	//We register to the cache
+	Variables::registerCache(input, variableName);
 	return true;
 }
 
@@ -62,4 +48,27 @@ bool Variables::isVariable(std::string input)
 {
 	std::string unused;
 	return Variables::variableName(input, unused);
+}
+
+//Micro caching
+void Variables::registerCache(std::string rawInput, std::string variableName)
+{
+	Variables & instance = Variables::Instance();
+	
+	instance.cacheRaw = rawInput;
+	instance.cacheName = variableName;
+	instance.haveCache = true;
+}
+
+bool Variables::getCache(std::string & raw, std::string & name)
+{
+	Variables & instance = Variables::Instance();
+	
+	if(!instance.haveCache)
+		return false;
+	
+	raw = instance.cacheRaw;
+	name = instance.cacheName;
+	
+	return true;
 }

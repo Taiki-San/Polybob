@@ -100,3 +100,38 @@ void printMonome(monome input)
 	else
 		std::cout << '\n';
 }
+
+//Parser utils
+bool havePlusOnLevel(std::string level, std::vector<uint> & positions)
+{
+	return false;
+}
+
+bool haveMultOnLevel(std::string level, std::vector<uint> & positions)
+{
+	return false;
+}
+
+bool isFunction(std::string level, std::string functionName, bool & error)
+{
+	return false;
+}
+
+uint8_t getPreviousOP(char operand)
+{
+	switch (operand)
+	{
+		case '+':
+			return OP_PLUS;
+			
+		case '-':
+			return OP_MINUS;
+			
+		case '/':
+			return OP_DIV;
+			
+		case '^':
+			return OP_POWER;
+	}
+	return OP_MULT;
+}

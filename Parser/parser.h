@@ -4,6 +4,9 @@
 
 	class Variables
 	{
+		std::string cacheRaw, cacheName;
+		bool haveCache;
+		
 		Variables();
 		Variables(Variables const&);
 		
@@ -12,6 +15,11 @@
 		
 		static bool variableName(std::string input, std::string & variableName);
 		static bool isVariable(std::string input);
+		
+		static void registerCache(std::string rawInput, std::string variableName);
+		static bool getCache(std::string & raw, std::string & name);
 	};
+
+	int parserEntrypoint();
 
 #endif

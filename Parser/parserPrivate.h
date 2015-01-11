@@ -2,13 +2,10 @@
 #include <string>
 #include <vector>
 #include <complex>
+#include <algorithm>
 #include "parser.h"
 
-typedef struct complex
-{
-	double coefReal;
-	double coefComplex;
-}complexType;
+#pragma mark Enums
 
 enum
 {
@@ -25,7 +22,7 @@ enum
 {
 	PREV_OP_NONE = 0,
 	PREV_OP_MULT,
-	PREV_OP_DIV
+	PREV_OP_SUM
 };
 
 enum
@@ -35,6 +32,14 @@ enum
 	TYPE_OP_CALCUL = 0x2,
 };
 
+#pragma mark Structures
+
+typedef struct complex
+{
+	double coefReal;
+	double coefComplex;
+}complexType;
+
 typedef struct monome
 {
 	complexType coef;
@@ -42,9 +47,10 @@ typedef struct monome
 
 } monome;
 
+#pragma mark Entity
+
 class Entity
 {
-	std::vector<monome> levelMember;
 	std::vector<Entity> subLevel;
 
 	bool isContainer;
@@ -52,21 +58,49 @@ class Entity
 
 	std::string functionName;
 
-	uint8_t previousOperator;
-
 public:
+	
+	monome _monome;
+
+	uint8_t previousOperator;
+	int power;
+	bool initialized;
+	
 	Entity();
-	bool insertMonomeEntry(monome entry);
-	bool insertSublevelEntry(Entity entry);
+	bool setMonome(monome entry);
+	bool setSublevel(std::vector<Entity> entry);
 	bool setFunction(std::string name);
+	
+	bool isReal();
 };
+
+#pragma mark - Declarations -
+#pragma mark Parser core
+
+Entity parserCore(std::string input, int opType, bool & error);
+Entity _parseEntity(std::string level, bool & error);
+std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, bool & error);
+monome parseMonome(std::string str, bool & error);
+
+#pragma mark Parser utils
+
+bool havePlusOnLevel(std::string level, std::vector<uint> & positions);
+bool haveMultOnLevel(std::string level, std::vector<uint> & positions);
+bool isFunction(std::string level, std::string functionName, bool & error);
+uint8_t getPreviousOP(char operand);
+
+#pragma mark Spirit utils
 
 complexType getNumber(std::string string);
 complexType combineComplexParser(complexType a, complexType b);
-void printMonome(monome input);
-bool isVariable(std::string input);
+
+#pragma mark Sanitization
 
 bool checkString(std::string input);
 int syntaxAnalysis(std::string input);
 
-monome parseMonome(std::string str, bool & error);
+#pragma mark IO
+
+void printMonome(monome input);
+
+

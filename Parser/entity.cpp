@@ -2,41 +2,34 @@
 
 Entity::Entity()
 {
+	initialized = false;
 	isContainer = isFunction = false;
 	previousOperator = PREV_OP_NONE;
 }
 
-bool Entity::insertMonomeEntry(monome entry)
+bool Entity::setMonome(monome entry)
 {
 	if(isContainer)
 		return false;
 	
-	for(std::vector<monome>::iterator begin = levelMember.begin(); begin != levelMember.end(); ++begin)
-	{
-		if(begin->exponent == entry.exponent)
-		{
-			begin->coef.coefReal += entry.coef.coefReal;
-			begin->coef.coefComplex += entry.coef.coefComplex;
-			return true;
-		}
-	}
-	
-	levelMember.push_back(entry);
+	_monome = entry;
 	return true;
 }
 
-bool Entity::insertSublevelEntry(Entity entry)
+bool Entity::setSublevel(std::vector<Entity> entry)
 {
-	if(!isContainer && !levelMember.empty())
+	if(initialized && !isContainer)
 		return false;
 	
-	subLevel.push_back(entry);
+	isContainer = true;
+	subLevel = entry;
+	
 	return true;
 }
 
 bool Entity::setFunction(std::string name)
 {
-	if(!levelMember.empty() || !subLevel.empty())
+	if(initialized)
 		return false;
 	
 	isContainer = true;
@@ -44,4 +37,9 @@ bool Entity::setFunction(std::string name)
 	functionName = name;
 	
 	return true;
+}
+
+bool Entity::isReal()
+{
+	return !isContainer && _monome.exponent == 1 && _monome.coef.coefComplex == 0;
 }
