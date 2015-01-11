@@ -134,7 +134,7 @@ bool checkString(std::string input)
 			case '+':
 			case '^':
 			{
-				if(last != 0)
+				if(last != 0 && last != ')')
 					inconsistency = true;
 				else
 					last = *iterator == '+' ? '+' : '^';

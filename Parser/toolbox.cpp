@@ -105,7 +105,7 @@ void printMonome(monome input)
 bool havePlusOnLevel(std::string level, std::vector<uint> & positions)
 {
 	bool inBlock = false, haveFoundSomething = false;
-	char exitChar = 0, currentChar;
+	char exitChar = 0, currentChar, previousChar = 0;
 	uint index = 0;
 	
 	for(std::string::const_iterator currentCharIt = level.begin(); currentCharIt != level.end(); ++currentCharIt, index++)
@@ -119,7 +119,7 @@ bool havePlusOnLevel(std::string level, std::vector<uint> & positions)
 			else
 				inBlock = false;
 		}
-		else if(currentChar == '+' || currentChar == '-' || currentChar == '^')
+		else if(currentChar == '+' || currentChar == '-' || (currentChar == '^' && previousChar != 'x'))
 		{
 			haveFoundSomething = true;
 			positions.push_back(index);
@@ -141,19 +141,25 @@ bool havePlusOnLevel(std::string level, std::vector<uint> & positions)
 			inBlock = true;
 			exitChar = '}';
 		}
+
+		previousChar = currentChar;
 	}
+	
+	if(haveFoundSomething)
+		positions.push_back((uint)level.length());
 	
 	return haveFoundSomething;
 }
 
 bool haveMultOnLevel(std::string level, std::vector<uint> & positions)
 {
-	bool inBlock = false, haveFoundSomething = false;
-	char exitChar = 0, currentChar;
+	bool inBlock = false, haveFoundSomething = false, indexedLastRun = false;
+	char exitChar = 0, currentChar, previousChar = 0;
 	uint index = 0;
 	
 	for(std::string::const_iterator currentCharIt = level.begin(); currentCharIt != level.end(); ++currentCharIt, index++)
 	{
+		indexedLastRun = false;
 		currentChar = *currentCharIt;
 		
 		if(inBlock)
@@ -163,9 +169,10 @@ bool haveMultOnLevel(std::string level, std::vector<uint> & positions)
 			else
 			{
 				inBlock = false;
-				if(exitChar == ')')
+				if(exitChar == ')')		//The equation may end with this, and if so, we don't want to add an other marker afterward
 				{
 					haveFoundSomething = true;
+					indexedLastRun = true;
 					positions.push_back(index);
 				}
 			}
@@ -174,6 +181,11 @@ bool haveMultOnLevel(std::string level, std::vector<uint> & positions)
 		{
 			haveFoundSomething = true;
 			positions.push_back(index);
+		}
+		else if(currentChar == '^' && previousChar != 'x')
+		{
+			haveFoundSomething = true;
+			positions.push_back(index);			
 		}
 		else if(currentChar == '(')
 		{
@@ -194,7 +206,12 @@ bool haveMultOnLevel(std::string level, std::vector<uint> & positions)
 			inBlock = true;
 			exitChar = '}';
 		}
+		
+		previousChar = currentChar;
 	}
+	
+	if(haveFoundSomething && !indexedLastRun)
+		positions.push_back((uint)level.length());
 	
 	return haveFoundSomething;
 }

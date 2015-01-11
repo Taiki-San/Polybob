@@ -40,7 +40,7 @@ typedef struct localMonome
 {
 	std::string coefficientBegin;
 	std::string coefficientEnd;
-	int x_exponent;
+	uint x_exponent;
 } internalMonome;
 
 namespace client
@@ -55,16 +55,15 @@ namespace client
 		calculator() : calculator::base_type(polynomial)
 		{
 			using qi::_val;
-			using qi::uint_;
 			using qi::eps;
 			qi::char_type char_;
 
 			//This part is going to parse polynoms
-			x_term = 'x' >> (('^' >> qi::uint_) | eps[_val = 1]) | eps[_val = 0];
+			x_term = char_("x") >> ((char_("^") >> qi::uint_[_val = qi::_1]) | eps[_val = 1]);
 
 			//Will parse a single component
 			variable = -char_("i")
-						>> ((char_("{") >> (+char_("a-zA-Z_0-9") - char_("}")) >> char_("]"))
+						>> ((char_("{") >> (+char_("a-zA-Z_0-9") - char_("}")) >> char_("}"))
 						| (+char_("0-9") >> -(char_(".") >> +char_("0-9"))))
 						>> -char_("i");
 
@@ -73,14 +72,15 @@ namespace client
 				>>	(variable[phx::bind(&internalMonome::coefficientBegin, _val) = qi::_1]
 					| eps[phx::bind(&internalMonome::coefficientBegin, _val) = "1"])
 
-				>> (-char_("*") >> x_term[phx::bind(&internalMonome::x_exponent, _val) = qi::_1])
+				>> (-char_("*") >> (x_term[phx::bind(&internalMonome::x_exponent, _val) = qi::_1]
+								| eps[phx::bind(&internalMonome::x_exponent, _val) = SPIRIT_DEFAULT_POWER_VALUE]))
 
 				>>  (variable[phx::bind(&internalMonome::coefficientEnd, _val) = qi::_1]
 					| eps[phx::bind(&internalMonome::coefficientEnd, _val) = "1"]);
 		}
 
 		qi::rule<Iterator, internalMonome(), ascii::space_type> polynomial;
-		qi::rule<Iterator, int(), ascii::space_type> x_term;
+		qi::rule<Iterator, uint(), ascii::space_type> x_term;
 		qi::rule<Iterator, std::string(), ascii::space_type> variable;
 	};
 }
@@ -109,10 +109,9 @@ monome parseMonome(std::string str, bool & error)
 		error = true;
 
 		std::string rest(begin, end);
-		std::cout << "-------------------------\n";
-		std::cout << "Parsing failed\n";
-		std::cout << "stopped at: \" " << rest << "\"\n";
-		std::cout << "-------------------------\n";
+#ifdef VERBOSE
+		std::cout << "Parsing failed, stopped at: \" " << rest << "\"" << " ~ full string: " << str << '\n';
+#endif
 	}
 
 	return output;

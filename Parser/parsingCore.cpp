@@ -13,6 +13,9 @@ Entity parserCore(std::string input, int opType, bool & error)
 		if(!Variables::variableName(input.substr(0, pos), receiver))
 		{
 			error = true;
+#ifdef VERBOSE
+			std::cerr << "No variable of name " << input.substr(0, pos) << '\n';
+#endif
 			return output;
 		}
 		else
@@ -48,7 +51,12 @@ Entity _parseEntity(std::string level, bool & error)
 				output.setFunction(functionName);
 		}
 		else
+		{
 			error = true;
+#ifdef VERBOSE
+			std::cerr << "No valid argument for function " << functionName <<  "\nContext: " << level << '\n';
+#endif
+		}
 	}
 	else if(!error)
 	{
@@ -68,6 +76,9 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 	if(positions.size() == 0)
 	{
 		error = true;
+#ifdef VERBOSE
+		std::cerr << "No positions in array\n";
+#endif
 		return output;
 	}
 	
@@ -78,7 +89,10 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 	//Positions contain the index of operators
 	for(std::vector<uint>::const_iterator current = positions.begin(); current != positions.end(); ++current)
 	{
-		entity = _parseEntity(level.substr(basePos, *current), error);
+#ifdef VERBOSE
+		std::cout << "Current portion: " << level.substr(basePos, *current-basePos) << '\n';
+#endif
+		entity = _parseEntity(level.substr(basePos, *current - basePos), error);
 		if(error)
 			break;
 
@@ -89,15 +103,20 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 			entity.previousOperator = getPreviousOP(level[basePos-1]);
 			if(entity.previousOperator == OP_POWER)
 			{
-				Entity previous = output.back();
+				Entity & previous = output.back();
 				if(entity.isReal())
 				{
+					
 					previous.power += int(entity._monome.coef.coefReal);
 					dropEntity = true;
 				}
 				else	//We don't support weird powers...
 				{
 					error = true;
+#ifdef VERBOSE
+					std::cerr << "Invalid power: " << level.substr(basePos, *current) << " ~ " << *current << '\n';
+#endif
+
 					break;
 				}
 			}

@@ -5,6 +5,7 @@ Entity::Entity()
 	initialized = false;
 	isContainer = isFunction = false;
 	previousOperator = PREV_OP_NONE;
+	power = 0;
 }
 
 bool Entity::setMonome(monome entry)
@@ -41,5 +42,5 @@ bool Entity::setFunction(std::string name)
 
 bool Entity::isReal()
 {
-	return !isContainer && _monome.exponent == 1 && _monome.coef.coefComplex == 0;
+	return !isContainer && _monome.exponent == SPIRIT_DEFAULT_POWER_VALUE && _monome.coef.coefComplex == 0;
 }

@@ -5,6 +5,9 @@
 #include <algorithm>
 #include "parser.h"
 
+#define VERBOSE
+#define SPIRIT_DEFAULT_POWER_VALUE 0
+
 #pragma mark Enums
 
 enum
