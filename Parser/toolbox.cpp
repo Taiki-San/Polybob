@@ -93,8 +93,10 @@ void printMonome(monome input)
 	else
 		std::cout << '(' << input.coef.coefReal << '+' << input.coef.coefComplex << "i)";
 
-	if(input.exponent != 0)
+	if(input.exponent > 1)
 		std::cout << "x^" << input.exponent << '\n';
+	else if(input.exponent == 1)
+		std::cout << "x\n";
 	else
 		std::cout << '\n';
 }
