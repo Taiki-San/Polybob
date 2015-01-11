@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <complex>
+#include "parser.h"
 
 typedef struct complex
 {
@@ -27,6 +28,13 @@ enum
 	PREV_OP_DIV
 };
 
+enum
+{
+	TYPE_OP_INVALID = 0,
+	TYPE_OP_ALLOC = 0x1,
+	TYPE_OP_CALCUL = 0x2,
+};
+
 typedef struct monome
 {
 	complexType coef;
@@ -49,11 +57,16 @@ class Entity
 public:
 	Entity();
 	bool insertMonomeEntry(monome entry);
+	bool insertSublevelEntry(Entity entry);
+	bool setFunction(std::string name);
 };
 
-bool checkString(std::string input);
 complexType getNumber(std::string string);
-void printMonome(monome input);
 complexType combineComplexParser(complexType a, complexType b);
+void printMonome(monome input);
+bool isVariable(std::string input);
+
+bool checkString(std::string input);
+int syntaxAnalysis(std::string input);
 
 monome parseMonome(std::string str, bool & error);
