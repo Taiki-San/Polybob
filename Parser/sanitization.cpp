@@ -3,14 +3,17 @@
 //Perform basic consistency checks, ensure parenthesis and brackets are properly set, and that there is no illegal operator combinaison
 bool checkString(std::string input)
 {
-	std::string::const_iterator iterator;
+	std::string::const_iterator iterator = input.begin();
 	std::vector<int> parenthesisCountInBracket;
 	int parenthesisCount = 0, bracketCount = 0;
 	char last = 0;
-	bool inconsistency = false, inBraces = false;
+	bool inconsistency = false, inBraces = false, firstEqual = true;
+	
+	if(*iterator == '+' || *iterator == '*' || *iterator == '/' || *iterator == '^' || *iterator == '=')
+		inconsistency = true;
 
 	//Initial check, we will simply check coherency in (), [] and incompatible operators
-	for(iterator = input.begin(); iterator != input.end() && !inconsistency; ++iterator)
+	for(; iterator != input.end() && !inconsistency; ++iterator)
 	{
 		if(inBraces)
 		{
@@ -96,6 +99,17 @@ bool checkString(std::string input)
 
 				break;
 			}
+				
+			case '=':
+			{
+				if(firstEqual)
+				{
+					firstEqual = false;
+					last = '=';
+				}
+				else
+					inconsistency = true;
+			}
 
 
 			case '*':
@@ -142,9 +156,27 @@ bool checkString(std::string input)
 			std::cerr << "Invalid bracket [] combinaison\n";
 		else if(inBraces)
 			std::cerr << "Invalid brace {} combinaison\n";
+		else if(!firstEqual || last == '=')
+			std::cerr << "Only 1 equal per equation";
 		else
 			std::cerr << "Invalid operand combinaison: " << last << " before " << *--iterator << '\n';
 	}
 
 	return !inconsistency;
 }
+
+int syntaxAnalysis(std::string input)
+{
+	size_t index;
+	
+	if((index = input.find('=')) != -1)
+	{
+		std::string substring = input.substr(0, index);
+		if(Variables::isVariable(substring))
+			return TYPE_OP_ALLOC;
+		return TYPE_OP_INVALID;
+	}
+	
+	return TYPE_OP_CALCUL;
+}
+

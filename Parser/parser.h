@@ -1,11 +1,17 @@
+#ifndef PARSER_HEADER
 
-class Variables
-{
+	#define PARSER_HEADER
 
-public:
-	static Variables* Instance();
-	
-private:
-	Variables();
-	static Variables* instance;
-};
+	class Variables
+	{
+		Variables();
+		Variables(Variables const&);
+		
+	public:
+		static Variables& Instance();
+		
+		static bool variableName(std::string input, std::string & variableName);
+		static bool isVariable(std::string input);
+	};
+
+#endif
