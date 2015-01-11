@@ -64,6 +64,7 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 {
 	std::vector<Entity> output;
 	
+	//Shouldn't happen (as error would have been triggered)
 	if(positions.size() == 0)
 	{
 		error = true;
@@ -74,6 +75,7 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 	uint basePos = 0;
 	bool dropEntity = false;
 	
+	//Positions contain the index of operators
 	for(std::vector<uint>::const_iterator current = positions.begin(); current != positions.end(); ++current)
 	{
 		entity = _parseEntity(level.substr(basePos, *current), error);
@@ -92,6 +94,11 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 				{
 					previous.power += int(entity._monome.coef.coefReal);
 					dropEntity = true;
+				}
+				else	//We don't support weird powers...
+				{
+					error = true;
+					break;
 				}
 			}
 		}

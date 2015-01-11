@@ -104,12 +104,99 @@ void printMonome(monome input)
 //Parser utils
 bool havePlusOnLevel(std::string level, std::vector<uint> & positions)
 {
-	return false;
+	bool inBlock = false, haveFoundSomething = false;
+	char exitChar = 0, currentChar;
+	uint index = 0;
+	
+	for(std::string::const_iterator currentCharIt = level.begin(); currentCharIt != level.end(); ++currentCharIt, index++)
+	{
+		currentChar = *currentCharIt;
+		
+		if(inBlock)
+		{
+			if(currentChar != exitChar)
+				continue;
+			else
+				inBlock = false;
+		}
+		else if(currentChar == '+' || currentChar == '-' || currentChar == '^')
+		{
+			haveFoundSomething = true;
+			positions.push_back(index);
+		}
+
+		//Ignored blocks
+		else if(currentChar == '(')
+		{
+			inBlock = true;
+			exitChar = ')';
+		}
+		else if(currentChar == '[')
+		{
+			inBlock = true;
+			exitChar = ']';
+		}
+		else if(currentChar == '{')
+		{
+			inBlock = true;
+			exitChar = '}';
+		}
+	}
+	
+	return haveFoundSomething;
 }
 
 bool haveMultOnLevel(std::string level, std::vector<uint> & positions)
 {
-	return false;
+	bool inBlock = false, haveFoundSomething = false;
+	char exitChar = 0, currentChar;
+	uint index = 0;
+	
+	for(std::string::const_iterator currentCharIt = level.begin(); currentCharIt != level.end(); ++currentCharIt, index++)
+	{
+		currentChar = *currentCharIt;
+		
+		if(inBlock)
+		{
+			if(currentChar != exitChar)
+				continue;
+			else
+			{
+				inBlock = false;
+				if(exitChar == ')')
+				{
+					haveFoundSomething = true;
+					positions.push_back(index);
+				}
+			}
+		}
+		else if(currentChar == '*' || currentChar == '/')
+		{
+			haveFoundSomething = true;
+			positions.push_back(index);
+		}
+		else if(currentChar == '(')
+		{
+			inBlock = true;
+			exitChar = ')';
+			haveFoundSomething = true;
+			positions.push_back(index);
+		}
+		
+		//Ignored blocks
+		else if(currentChar == '[')
+		{
+			inBlock = true;
+			exitChar = ']';
+		}
+		else if(currentChar == '{')
+		{
+			inBlock = true;
+			exitChar = '}';
+		}
+	}
+	
+	return haveFoundSomething;
 }
 
 bool isFunction(std::string level, std::string functionName, bool & error)
