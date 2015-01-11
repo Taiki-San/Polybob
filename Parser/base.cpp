@@ -16,7 +16,10 @@ int main()
 		else if(!checkString(str))
 			continue;
 
-		parseMonome(str, error);
+		monome input = parseMonome(str, error);
+
+		if(!error)
+			printMonome(input);
 	}
 
 	std::cout << "Bye... :-) \n\n";

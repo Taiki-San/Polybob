@@ -60,8 +60,7 @@ namespace client
 			qi::char_type char_;
 
 			//This part is going to parse polynoms
-			exponent %= '^' >> qi::uint_;
-			x_term %= 'x' >> ( exponent | eps[_val = 1] );
+			x_term = 'x' >> (('^' >> qi::uint_) | eps[_val = 1]) | eps[_val = 0];
 
 			//Will parse a single component
 			variable = -char_("i")
@@ -74,26 +73,16 @@ namespace client
 				>>	(variable[phx::bind(&internalMonome::coefficientBegin, _val) = qi::_1]
 					| eps[phx::bind(&internalMonome::coefficientBegin, _val) = "1"])
 
-				>> ((-char_("*") >> x_term[phx::bind(&internalMonome::x_exponent, _val) = qi::_1])
-						| eps[phx::bind(&internalMonome::x_exponent, _val) = 0])
+				>> (-char_("*") >> x_term[phx::bind(&internalMonome::x_exponent, _val) = qi::_1])
 
 				>>  (variable[phx::bind(&internalMonome::coefficientEnd, _val) = qi::_1]
 					| eps[phx::bind(&internalMonome::coefficientEnd, _val) = "1"]);
 		}
 
 		qi::rule<Iterator, internalMonome(), ascii::space_type> polynomial;
-		qi::rule<Iterator, int(), ascii::space_type> exponent;
 		qi::rule<Iterator, int(), ascii::space_type> x_term;
 		qi::rule<Iterator, std::string(), ascii::space_type> variable;
 	};
-}
-
-void print(internalMonome internMonome)
-{
-	std::cout << "new poly term:\n";
-	std::cout << "  coefficientBegin: " << (internMonome.coefficientBegin.empty() ? "" : internMonome.coefficientBegin) << "\n";
-	std::cout << "  coefficientEnd: " << (internMonome.coefficientEnd.empty() ? "" : internMonome.coefficientEnd) << "\n";
-	std::cout << "  x_exponent: " << internMonome.x_exponent << "\n\n";
 }
 
 monome parseMonome(std::string str, bool & error)
@@ -111,19 +100,9 @@ monome parseMonome(std::string str, bool & error)
 
 	if (r && begin == end)
 	{
-		complexType ending;
-
 		error = false;
-		output.coef = getNumber(internMonome.coefficientBegin);
-		ending = getNumber(internMonome.coefficientEnd);
-
-		output.coef.coefReal += ending.coefReal;
-		output.coef.coefComplex += ending.coefComplex;
-
-		std::cout << "-------------------------\n";
-		std::cout << "Parsing succeeded\n";
-		print(internMonome);
-		std::cout << "-------------------------\n";
+		output.coef = combineComplexParser(getNumber(internMonome.coefficientBegin), getNumber(internMonome.coefficientEnd));
+		output.exponent = internMonome.x_exponent;
 	}
 	else
 	{

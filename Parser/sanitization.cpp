@@ -127,5 +127,5 @@ bool checkString(std::string input)
 			std::cout << "Invalid operand combinaison: " << last << " before " << *--iterator << '\n';
 	}
 
-	return inconsistency;
+	return !inconsistency;
 }

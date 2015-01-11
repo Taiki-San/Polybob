@@ -53,5 +53,7 @@ public:
 
 bool checkString(std::string input);
 complexType getNumber(std::string string);
+void printMonome(monome input);
+complexType combineComplexParser(complexType a, complexType b);
 
 monome parseMonome(std::string str, bool & error);
