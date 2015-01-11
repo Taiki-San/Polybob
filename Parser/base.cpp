@@ -35,6 +35,8 @@ int parserEntrypoint()
 
 		entity = parserCore(str, operation, error);
 
+		if(!error)
+			entity.print(0);
 //		if(!error)
 //			printMonome(input);
 	}

@@ -81,6 +81,7 @@ bool checkString(std::string input)
 					inconsistency = true;
 				else
 				{
+					bracketCount++;
 					parenthesisCountInBracket.insert(parenthesisCountInBracket.end(), 0);
 					last = '[';
 				}
@@ -172,7 +173,7 @@ int syntaxAnalysis(std::string input)
 	if((index = input.find('=')) != -1)
 	{
 		std::string substring = input.substr(0, index);
-		if(Variables::isVariable(substring))
+		if(Catalog::isVariable(substring))
 			return TYPE_OP_ALLOC;
 		return TYPE_OP_INVALID;
 	}

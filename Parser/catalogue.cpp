@@ -1,24 +1,24 @@
 #include "parserPrivate.h"
 
-Variables& Variables::Instance()
+Catalog& Catalog::Instance()
 {
-	static Variables instance;
+	static Catalog instance;
 	
 	return instance;
 }
 
-Variables::Variables()
+Catalog::Catalog()
 {
 	haveCache = false;
 }
 
-bool Variables::variableName(std::string input, std::string & variableName)
+bool Catalog::variableName(std::string input, std::string & variableName)
 {
 	std::string rawCache, cacheName;
 	size_t length;
 	
 	//We check the cache
-	if(Variables::getCache(rawCache, cacheName) && rawCache == input)
+	if(Catalog::getCache(rawCache, cacheName) && rawCache == input)
 	{
 		variableName = cacheName;
 		return true;
@@ -40,29 +40,29 @@ bool Variables::variableName(std::string input, std::string & variableName)
 	}
 	
 	//We register to the cache
-	Variables::registerCache(input, variableName);
+	Catalog::registerCache(input, variableName);
 	return true;
 }
 
-bool Variables::isVariable(std::string input)
+bool Catalog::isVariable(std::string input)
 {
 	std::string unused;
-	return Variables::variableName(input, unused);
+	return Catalog::variableName(input, unused);
 }
 
 //Micro caching
-void Variables::registerCache(std::string rawInput, std::string variableName)
+void Catalog::registerCache(std::string rawInput, std::string variableName)
 {
-	Variables & instance = Variables::Instance();
+	Catalog & instance = Catalog::Instance();
 	
 	instance.cacheRaw = rawInput;
 	instance.cacheName = variableName;
 	instance.haveCache = true;
 }
 
-bool Variables::getCache(std::string & raw, std::string & name)
+bool Catalog::getCache(std::string & raw, std::string & name)
 {
-	Variables & instance = Variables::Instance();
+	Catalog & instance = Catalog::Instance();
 	
 	if(!instance.haveCache)
 		return false;

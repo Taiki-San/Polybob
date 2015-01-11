@@ -60,7 +60,7 @@ class Entity
 	bool isFunction;
 
 	std::string functionName;
-
+	
 public:
 	
 	monome _monome;
@@ -74,7 +74,13 @@ public:
 	bool setSublevel(std::vector<Entity> entry);
 	bool setFunction(std::string name);
 	
-	bool isReal();
+	void updatePowerOfLast(int power);
+	
+	bool isReal() const;
+	
+	void print(uint depth)	const;
+	void print()		const;
+	void printMonome()	const;
 };
 
 #pragma mark - Declarations -
@@ -101,9 +107,4 @@ complexType combineComplexParser(complexType a, complexType b);
 
 bool checkString(std::string input);
 int syntaxAnalysis(std::string input);
-
-#pragma mark IO
-
-void printMonome(monome input);
-
 

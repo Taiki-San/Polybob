@@ -10,7 +10,7 @@ Entity parserCore(std::string input, int opType, bool & error)
 	{
 		size_t pos = input.find('=');
 		
-		if(!Variables::variableName(input.substr(0, pos), receiver))
+		if(!Catalog::variableName(input.substr(0, pos), receiver))
 		{
 			error = true;
 #ifdef VERBOSE
@@ -107,7 +107,7 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 				if(entity.isReal())
 				{
 					
-					previous.power += int(entity._monome.coef.coefReal);
+					previous.updatePowerOfLast(int(entity._monome.coef.coefReal));
 					dropEntity = true;
 				}
 				else	//We don't support weird powers...

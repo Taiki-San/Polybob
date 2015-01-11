@@ -2,16 +2,16 @@
 
 	#define PARSER_HEADER
 
-	class Variables
+	class Catalog
 	{
 		std::string cacheRaw, cacheName;
 		bool haveCache;
 		
-		Variables();
-		Variables(Variables const&);
+		Catalog();
+		Catalog(Catalog const&);
 		
 	public:
-		static Variables& Instance();
+		static Catalog& Instance();
 		
 		static bool variableName(std::string input, std::string & variableName);
 		static bool isVariable(std::string input);

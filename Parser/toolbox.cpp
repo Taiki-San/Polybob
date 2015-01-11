@@ -75,32 +75,6 @@ complexType combineComplexParser(complexType a, complexType b)
 	return a;
 }
 
-void printMonome(monome input)
-{
-	std::cout << "Success:\n  coefficient: ";
-	if(input.coef.coefReal == 0 && input.coef.coefComplex == 0)
-	{
-		std::cout << "0\n";
-		return;
-	}
-
-	else if(input.coef.coefComplex == 0)
-		std::cout << input.coef.coefReal;
-
-	else if(input.coef.coefReal == 0)
-		std::cout << input.coef.coefComplex << 'i';
-
-	else
-		std::cout << '(' << input.coef.coefReal << '+' << input.coef.coefComplex << "i)";
-
-	if(input.exponent > 1)
-		std::cout << "x^" << input.exponent << '\n';
-	else if(input.exponent == 1)
-		std::cout << "x\n";
-	else
-		std::cout << '\n';
-}
-
 //Parser utils
 bool havePlusOnLevel(std::string level, std::vector<uint> & positions)
 {
@@ -218,7 +192,43 @@ bool haveMultOnLevel(std::string level, std::vector<uint> & positions)
 
 bool isFunction(std::string level, std::string functionName, bool & error)
 {
-	return false;
+	//Not finishing as a function
+	if(level[level.length()-1] != ']')
+		return false;
+	
+	//Containing several function
+	size_t index = level.find(']');
+	
+	//We may contain several functions, but we're not sure, let's check
+	if(index != level.length() - 1)
+	{
+		char c;
+		bool stillMayBeInVar = true;
+		while((c = level[++index]) != ']')
+		{
+			//We enter a new variable name (proving we were indeed the end of an early function) or a new function (proving that there is more than one function)
+			if((stillMayBeInVar && c == '{') || (!stillMayBeInVar && c == '['))
+				return false;
+			
+			//Ok, we were in a variable name, but there still could be a function after us (eg: f[{lol]42}]+2g[1337])
+			else if(c == '}')
+				stillMayBeInVar = false;
+		}
+		
+		//We never encountered any var, so there was indeed two+ functions
+		if(stillMayBeInVar)
+			return false;
+		
+		//Okay, some dumbass named a variable with a ] inside, congrats...
+	}
+
+	index = level.find('[');
+	
+	level = level.substr(0, index - 1);
+	
+	//We have our function name, let's see if it does exist
+	
+	return true;
 }
 
 uint8_t getPreviousOP(char operand)
