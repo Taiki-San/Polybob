@@ -13,7 +13,6 @@ int parserEntrypoint()
 	std::cout << "Type an expression...or [q or Q] to quit\n\n";
 
 	std::string str;
-	bool error;
 	int operation;
 	Entity entity;
 	
@@ -33,12 +32,14 @@ int parserEntrypoint()
 			continue;
 		}
 
+		bool error = false;
+
 		entity = parserCore(str, operation, error);
 
 		if(!error)
 			entity.print(0);
-//		if(!error)
-//			printMonome(input);
+		else
+			std::cout << "Hum, something went wrong, sorry :/\n";
 	}
 
 	std::cout << "Bye... :-) \n\n";
