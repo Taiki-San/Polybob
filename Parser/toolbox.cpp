@@ -235,6 +235,39 @@ bool isFunction(std::string level, uint & functionCode, bool & error)
 	return true;
 }
 
+void separateFunctionArgs(std::string level, std::vector<uint> & positions)
+{
+	bool inBlock = false;
+	char exitChar = 0, currentChar, previousChar = 0;
+	uint index = 0;
+	
+	for(std::string::const_iterator currentCharIt = level.begin(); currentCharIt != level.end(); ++currentCharIt, index++)
+	{
+		currentChar = *currentCharIt;
+		
+		if(inBlock)
+		{
+			if(currentChar != exitChar)
+				continue;
+			else
+				inBlock = false;
+		}
+		else if(currentChar == ',')
+			positions.push_back(index);
+		
+		//Ignored blocks
+		else if(currentChar == '[')
+			exitChar = ']';
+
+		else if(currentChar == '{')
+			exitChar = '}';
+		
+		previousChar = currentChar;
+	}
+	
+	positions.push_back((uint)level.length());
+}
+
 uint8_t getPreviousOP(char operand)
 {
 	switch (operand)

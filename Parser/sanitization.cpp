@@ -101,6 +101,16 @@ bool checkString(std::string input)
 				break;
 			}
 				
+			case ',':
+			{
+				if(!bracketCount || last == ',')
+					inconsistency = true;
+				else
+					last = ',';
+
+				break;
+			}
+				
 			case '=':
 			{
 				if(firstEqual)

@@ -46,7 +46,27 @@ Entity _parseEntity(std::string level, bool & error)
 		size_t start = level.find('[') + 1, length = level.find(']') - start;
 		if(length > 0)
 		{
-			output = _parseEntity(level.substr(start, length), error);
+			size_t nbArg;
+			std::vector<uint> positions;
+			std::string argument = level.substr(start, length);
+			
+			separateFunctionArgs(argument, positions);
+			nbArg = positions.size();
+			
+			if(nbArg != Catalog::getNbArgsForID(functionCode))
+			{
+				std::cerr << "Invalid number of argument for function " << Catalog::getFunctionName(functionCode) << " (" << nbArg << " instead of " << Catalog::getNbArgsForID(functionCode) << "), context, " << level << '\n';
+				error = true;
+			}
+			else if(nbArg == 1)
+				output = _parseEntity(argument, error);
+			else
+			{
+				std::vector<Entity> subLevel = _parseLevel(argument, positions, error);
+				if(!error)
+					output.setSublevel(subLevel);
+			}
+
 			if(!error)
 				output.setFunction(functionCode);
 		}

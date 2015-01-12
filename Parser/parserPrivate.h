@@ -96,6 +96,7 @@ monome parseMonome(std::string str, bool & error);
 bool havePlusOnLevel(std::string level, std::vector<uint> & positions);
 bool haveMultOnLevel(std::string level, std::vector<uint> & positions);
 bool isFunction(std::string level, uint & functionCode, bool & error);
+void separateFunctionArgs(std::string level, std::vector<uint> & positions);
 uint8_t getPreviousOP(char operand);
 
 #pragma mark Spirit utils

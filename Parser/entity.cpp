@@ -76,6 +76,9 @@ void Entity::print(uint depth) const
 		for (std::vector<Entity>::const_iterator i = subLevel.begin(); i != subLevel.end(); ++i)
 		{
 			i->print(depth + 1);
+			
+			if(isFunction)
+				std::cout << std::string(depth, SEPARATOR) << ",\n";
 		}
 
 		if(power != SPIRIT_DEFAULT_POWER_VALUE)
