@@ -46,14 +46,17 @@ Entity _parseEntity(std::string level, bool & error)
 		size_t start = level.find('[') + 1, length = level.find(']') - start;
 		if(length > 0)
 		{
-			size_t nbArg;
+			size_t nbArg, expected = Catalog::getNbArgsForID(functionCode);
 			std::vector<uint> positions;
 			std::string argument = level.substr(start, length);
 			
 			separateFunctionArgs(argument, positions);
 			nbArg = positions.size();
 			
-			if(nbArg != Catalog::getNbArgsForID(functionCode))
+			//expected = 0 => nbArg > 0
+			//expected > 0 => nbArg == expected
+			//(expected != 0 && nbArg != expected) || (expected == 0 && nbArg == expected)
+			if((nbArg != expected) ^ (expected == 0))
 			{
 				std::cerr << "Invalid number of argument for function " << Catalog::getFunctionName(functionCode) << " (" << nbArg << " instead of " << Catalog::getNbArgsForID(functionCode) << "), context, " << level << '\n';
 				error = true;

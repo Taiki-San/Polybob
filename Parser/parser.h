@@ -4,18 +4,39 @@
 
 	#define INVALID_FUNCTION_ID UINT_MAX
 
+enum
+{
+	FCODE_EXPAND		= 0,
+	FCODE_FACTOR		= 1,
+	FCODE_EVALUATE		= 2,
+	FCODE_INTERPOLATE	= 3,
+	FCODE_COMPOSITION	= 4,
+	FCODE_TEST			= 5,
+	FCODE_DUMP			= 6
+} FUNCTION_CODES;
+
+enum
+{
+	FARG_TYPE_POLY,
+	FARG_TYPE_POLY_NOFACT,
+	FARG_TYPE_FACTORISED,
+	FARG_TYPE_NUMBER
+};
+
 	class Catalog
 	{
 		std::string cacheRaw, cacheName;
 		bool haveCache;
 		
+		std::vector<uint> functionCodes;
+		std::vector<std::string> functionNames;
+		std::vector<uint> functionArgumentNumber;
+		std::vector<std::vector<uint>> functionArgumentType;
+
 		Catalog();
 		Catalog(Catalog const&);
 		
 	public:
-		std::vector<std::string> functionNames;
-		std::vector<uint> functionArgumentNumber;
-		
 		static Catalog& Instance();
 		
 		static uint getIDOfFunction(std::string name);

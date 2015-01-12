@@ -11,8 +11,10 @@ Catalog::Catalog()
 {
 	haveCache = false;
 	
-	functionNames = {"f", "g"};
-	functionArgumentNumber = {1, 2};
+	functionCodes = {FCODE_EXPAND, FCODE_FACTOR, FCODE_EVALUATE, FCODE_INTERPOLATE, FCODE_COMPOSITION, FCODE_TEST, FCODE_DUMP};
+	functionNames = {"expand", "factor", "evaluate", "interpolate", "composition", "test", "dump"};
+	functionArgumentNumber = {1, 1, 2, 0, 2};
+	functionArgumentType = {{FARG_TYPE_FACTORISED}, {FARG_TYPE_POLY_NOFACT}, {FARG_TYPE_POLY, FARG_TYPE_NUMBER}, {FARG_TYPE_NUMBER}, {FARG_TYPE_POLY, FARG_TYPE_POLY}};
 }
 
 #pragma mark Function related
