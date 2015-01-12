@@ -190,7 +190,7 @@ bool haveMultOnLevel(std::string level, std::vector<uint> & positions)
 	return haveFoundSomething;
 }
 
-bool isFunction(std::string level, std::string functionName, bool & error)
+bool isFunction(std::string level, uint & functionCode, bool & error)
 {
 	//Not finishing as a function
 	if(level[level.length()-1] != ']')
@@ -224,9 +224,13 @@ bool isFunction(std::string level, std::string functionName, bool & error)
 
 	index = level.find('[');
 	
-	level = level.substr(0, index - 1);
+	level = level.substr(0, index);
 	
 	//We have our function name, let's see if it does exist
+	functionCode = Catalog::getIDOfFunction(level);
+	
+	if(functionCode == INVALID_FUNCTION_ID)
+		return false;
 	
 	return true;
 }

@@ -30,14 +30,13 @@ bool Entity::setSublevel(std::vector<Entity> entry)
 	return true;
 }
 
-bool Entity::setFunction(std::string name)
+bool Entity::setFunction(uint function)
 {
 	if(initialized)
 		return false;
 	
-	isContainer = true;
 	isFunction = true;
-	functionName = name;
+	functionCode = function;
 	
 	return true;
 }
@@ -68,20 +67,9 @@ void Entity::print() const
 void Entity::print(uint depth) const
 {
 	if(isFunction)
-	{
-		std::cout << std::string(depth, SEPARATOR) << functionName << "[\n";
-		
-		for (std::vector<Entity>::const_iterator i = subLevel.begin(); i != subLevel.end(); ++i)
-		{
-			i->print(depth + 1);
-		}
-		
-		if(power != SPIRIT_DEFAULT_POWER_VALUE)
-			std::cout << std::string(depth, SEPARATOR) << "]^" << power << '\n';
-		else
-			std::cout << std::string(depth, SEPARATOR) << "]\n";
-	}
-	else if(isContainer)
+		std::cout << std::string(depth++, SEPARATOR) << Catalog::getFunctionName(functionCode) << "[\n";
+	
+	if(isContainer)
 	{
 		std::cout << std::string(depth, SEPARATOR) << "{\n";
 
@@ -106,6 +94,14 @@ void Entity::print(uint depth) const
 		
 		if(power != SPIRIT_DEFAULT_POWER_VALUE)
 			std::cout << ")^" << power << '\n';
+	}
+	
+	if(isFunction)
+	{
+		if(power != SPIRIT_DEFAULT_POWER_VALUE)
+			std::cout << std::string(--depth, SEPARATOR) << "]^" << power << '\n';
+		else
+			std::cout << std::string(--depth, SEPARATOR) << "]\n";
 	}
 }
 

@@ -10,7 +10,49 @@ Catalog& Catalog::Instance()
 Catalog::Catalog()
 {
 	haveCache = false;
+	
+	functionNames = {"f", "g"};
+	functionArgumentNumber = {1, 2};
 }
+
+#pragma mark Function related
+
+uint Catalog::getIDOfFunction(std::string name)
+{
+	Catalog & instance = Catalog::Instance();
+	uint index = 0;
+	for (std::vector<std::string>::const_iterator current = instance.functionNames.begin(); current != instance.functionNames.end(); ++current, ++index)
+	{
+		if(name == *current)
+			return index;
+	}
+	
+	return INVALID_FUNCTION_ID;
+}
+
+uint Catalog::getNbArgsForID(uint ID)
+{
+	Catalog & instance = Catalog::Instance();
+	if (ID >= instance.functionArgumentNumber.size())
+	{
+		return INVALID_FUNCTION_ID;
+	}
+	
+	return instance.functionArgumentNumber[ID];
+}
+
+std::string Catalog::getFunctionName(uint ID)
+{
+	Catalog & instance = Catalog::Instance();
+	if (ID >= instance.functionNames.size())
+	{
+		return "";
+	}
+	
+	return instance.functionNames[ID];
+}
+
+#pragma mark Variable related
 
 bool Catalog::variableName(std::string input, std::string & variableName)
 {

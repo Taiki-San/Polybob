@@ -59,7 +59,7 @@ class Entity
 	bool isContainer;
 	bool isFunction;
 
-	std::string functionName;
+	uint functionCode;
 	
 public:
 	
@@ -72,7 +72,7 @@ public:
 	Entity();
 	bool setMonome(monome entry);
 	bool setSublevel(std::vector<Entity> entry);
-	bool setFunction(std::string name);
+	bool setFunction(uint functionCode);
 	
 	void updatePowerOfLast(int power);
 	
@@ -95,7 +95,7 @@ monome parseMonome(std::string str, bool & error);
 
 bool havePlusOnLevel(std::string level, std::vector<uint> & positions);
 bool haveMultOnLevel(std::string level, std::vector<uint> & positions);
-bool isFunction(std::string level, std::string functionName, bool & error);
+bool isFunction(std::string level, uint & functionCode, bool & error);
 uint8_t getPreviousOP(char operand);
 
 #pragma mark Spirit utils

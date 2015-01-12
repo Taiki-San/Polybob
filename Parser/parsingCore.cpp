@@ -31,7 +31,7 @@ Entity _parseEntity(std::string level, bool & error)
 {
 	Entity output;
 	std::vector<uint> positions;
-	std::string functionName;
+	uint functionCode;
 	
 	if(havePlusOnLevel(level, positions) || haveMultOnLevel(level, positions))
 	{
@@ -39,7 +39,7 @@ Entity _parseEntity(std::string level, bool & error)
 		if(!error)
 			output.setSublevel(parsedLevel);
 	}
-	else if(isFunction(level, functionName, error))
+	else if(isFunction(level, functionCode, error))
 	{
 		//We extract the function argument, then evaluate the expression
 		
@@ -48,13 +48,13 @@ Entity _parseEntity(std::string level, bool & error)
 		{
 			output = _parseEntity(level.substr(start, length), error);
 			if(!error)
-				output.setFunction(functionName);
+				output.setFunction(functionCode);
 		}
 		else
 		{
 			error = true;
 #ifdef VERBOSE
-			std::cerr << "No valid argument for function " << functionName <<  "\nContext: " << level << '\n';
+			std::cerr << "No valid argument for function " << Catalog::getFunctionName(functionCode) <<  "\nContext: " << level << '\n';
 #endif
 		}
 	}
