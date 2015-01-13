@@ -152,7 +152,7 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 			break;
 
 		if(basePos <= 1)
-			entity.previousOperator = PREV_OP_NONE;
+			entity.previousOperator = OP_NONE;
 		else
 		{
 			entity.previousOperator = getPreviousOP(level[basePos-1]);

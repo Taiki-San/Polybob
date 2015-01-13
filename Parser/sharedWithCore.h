@@ -7,29 +7,6 @@
 #include <list>
 #include <cmath>
 
-#define INVALID_FUNCTION_ID UINT_MAX
-
-enum
-{
-	FCODE_EXPAND		= 0,
-	FCODE_FACTOR		= 1,
-	FCODE_EVALUATE		= 2,
-	FCODE_INTERPOLATE	= 3,
-	FCODE_COMPOSITION	= 4,
-	FCODE_TEST			= 5,
-	FCODE_DUMP			= 6
-} FUNCTION_CODES;
-
-enum
-{
-	FARG_TYPE_POLY_NOFACT 	= 1 << 0,
-	FARG_TYPE_FACTORISED	= 1 << 1,
-	FARG_TYPE_POLY			= FARG_TYPE_POLY_NOFACT | FARG_TYPE_FACTORISED,
-	FARG_TYPE_REAL			= 1 << 2,
-	FARG_TYPE_COMPLEX		= 1 << 3,
-	FARG_TYPE_NUMBER		= FARG_TYPE_REAL | FARG_TYPE_COMPLEX
-};
-
 /*
  *	Placeholder until real classes are added
  */
@@ -55,7 +32,7 @@ namespace Complex
 struct Monomial
 {
 	Complex::complexN coeff;
-	unsigned int power;
+	uint power;
 	
 	Monomial(const Complex::complexN &coeff, const unsigned int &power) : coeff(coeff), power(power) {}
 };
@@ -65,6 +42,13 @@ typedef struct factorisedElem
 	Complex::complexN coef;
 	uint power;
 } factorisedElem;
+
+typedef struct divResult
+{
+	uint quotient;
+	uint remain;
+	
+} divResult;
 
 typedef std::vector<Monomial> vectorMonomials_t;
 typedef std::vector<factorisedElem> vectorFact_t;

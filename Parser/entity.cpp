@@ -6,7 +6,7 @@ Entity::Entity() : _monome(Complex::complexN(0, 0), 0)
 {
 	initialized = false;
 	isContainer = isFunction = false;
-	previousOperator = PREV_OP_NONE;
+	previousOperator = OP_NONE;
 	power = 0;
 }
 
@@ -219,83 +219,231 @@ void Entity::maturation(bool & error)
 	else if(!isContainer)
 	{
 		polynome.push_back(_monome);
+		
+		matureType = getType();
+		if(matureType & FARG_TYPE_NUMBER)
+			numberPure = _monome.coeff;
+
+		else if(matureType & FARG_TYPE_FACTORISED)
+		{
+			factorisedElem element;
+			element.coef = _monome.coeff;
+			element.power = power;
+
+			vectorFact_t vector;
+			vector.push_back(element);
+			
+			polynomeFact = PolynomialFact(vector);
+			power = 1;
+		}
+		else
+		{
+			vectorMonomials_t vector;
+			vector.push_back(_monome);
+			polynomePure = Polynomial(vector);
+		}
 	}
 	else
 	{
-		//Awesome, we're in the tricky part, here are out assumptions:
+		//Awesome, we're in the tricky part, here are our assumptions:
 		//	Sublevel is consistent in priority, so no need to prioritize
 		//	We don't really care about our power, it'll get evaluated later (by the parent)
+		//	power == 1 if this is a factorised polynome
 		//	My earlier parser didn't messed with me :X
 		
-		bool firstRun = true;
-		std::vector<monome> currentStage, final;
+		/*
+		 *	We work on 3 types, Polynomial, PolynomialFact and Complex, and things get funny
+		 *
+		 *	+|-		Complex + Complex 	= Complex
+		 *			Sinon, 				Poly
+		 *
+		 *	*		Type * Type 		= Type
+		 *			Complex * Type 		= Type
+		 *			PolyFact * Complex	= PolyFact
+		 *			PolyFact * Poly		= Poly
+		 *			Poly * Type			= Poly
+		 *
+		 *	/		Type * OtherType	= divResult
+		 *
+		 */
 		
-		for(std::vector<Entity>::const_iterator iter = subLevel.begin(); iter != subLevel.end(); ++iter)
+		std::vector<Entity>::const_iterator iter = subLevel.begin();
+		
+		bool firstRun = true, fullyFactorised = false;
+		uint8_t currentType;
+		uint currentPower;
+		
+		matureType = FARG_TYPE_NUMBER;
+		
+		Polynomial finalPoly = Polynomial(), currentPoly;
+		PolynomialFact finalFact = PolynomialFact(), currentFact;
+		Complex::complexN finalNumber = Complex::complexN(0, 0), currentNumber;
+		
+		if((currentPower = iter->power) == 0)
+			currentPower = 1;
+		
+		currentType = iter->matureType;
+		
+		if(currentType & FARG_TYPE_NUMBER)
 		{
-			currentStage = iter->polynome;
-			
-#warning "Need linking to core the polynomial operations"
+			finalNumber += iter->numberPure;
+			for(uint i = 1; i < currentPower; i++)
+				finalNumber *= iter->numberPure;
+		}
+		
+		else if(currentType & FARG_TYPE_FACTORISED)
+		{
+			fullyFactorised = true;
 
-			if(iter->power > 1)
+			//Factorized form already consider the power
+			finalFact = iter->polynomeFact;
+		}
+		
+		else
+		{
+			finalPoly = iter->polynomePure;
+			for(uint i = 1; i < currentPower; i++)
+				finalPoly *= iter->polynomePure;
+		}
+		
+		for(++iter; iter != subLevel.end() && currentType != FARG_TYPE_DIV_RESULT; ++iter)
+		{
+			currentType = iter->matureType;
+			currentPower = iter->power;
+			
+			//We're not anymore a factorised form :(
+			if(fullyFactorised && (currentType & (FARG_TYPE_FACTORISED | FARG_TYPE_NUMBER)) == 0)
 			{
-				std::vector<monome> multiplier = currentStage;
-				
-				for(uint i = 1, power = iter->power; i < power; i++)
-				{
-					//Perform currentStage * multiplier
-				}
+				currentPoly += finalFact;
+				fullyFactorised = false;
+			}
+
+			//We transfer in the appropriate receiver
+			if(currentType & FARG_TYPE_NUMBER)
+			{
+				currentNumber = iter->numberPure;
+				for(uint i = 1; i < currentPower; i++)
+					currentNumber *= iter->numberPure;
 			}
 			
-			if(firstRun)
+			else if(currentType & FARG_TYPE_FACTORISED)
 			{
-				firstRun = false;
-				final = currentStage;
+				//Factorized form already consider the power
+				currentFact = iter->polynomeFact;
 			}
 			
 			else
 			{
-				switch (iter->previousOperator)
+				currentPoly = iter->polynomePure;
+				for(uint i = 1; i < currentPower; i++)
+					currentPoly *= iter->polynomePure;
+			}
+			
+			//Now, witchcraft, power are applied, we now have to combine them
+			//I rely a lot on a macro in order to get the proper argument depending of the type
+			
+#define CHOOSEVAR(__type, __poly, __fact, __complex) ((__type & FARG_TYPE_FACTORISED) ? __fact : ((__type & FARG_TYPE_NUMBER) ? __complex : __poly))
+
+			
+			switch (iter->previousOperator)
+			{
+				case OP_MINUS:
+				case OP_PLUS:
 				{
-					case OP_MINUS:
+					if(matureType & FARG_TYPE_NUMBER && currentType & FARG_TYPE_NUMBER)
 					{
-						//Perform minus
-						break;
+						if(iter->previousOperator == OP_MINUS)
+							finalNumber -= currentNumber;
+						else
+							finalNumber += currentNumber;
 					}
+					else
+					{
+						//Hum, we need to move our value in the appropriate variable, as type is about to change
+						if((matureType & FARG_TYPE_NUMBER) || (matureType & FARG_TYPE_FACTORISED))
+							migrateType(currentType, finalPoly, finalFact, finalNumber);
+
+						if(iter->previousOperator == OP_MINUS)
+							CHOOSEVAR(matureType, finalPoly, finalFact, finalNumber) -= CHOOSEVAR(currentType, currentPoly, currentFact, currentNumber);
+						else
+							CHOOSEVAR(matureType, finalPoly, finalFact, finalNumber) += CHOOSEVAR(currentType, currentPoly, currentFact, currentNumber);
+					}
+					break;
+				}
+					
+				case OP_DIV:
+				{
+					divisionResult = CHOOSEVAR(matureType, finalPoly, finalFact, finalNumber) / CHOOSEVAR(currentType, currentPoly, currentFact, currentNumber);
+					currentType = FARG_TYPE_DIV_RESULT;
+					break;
+				}
+
+				case OP_MULT:
+				{
+					if(CHOOSEVAR(matureType, 1, 2, 3) == CHOOSEVAR(currentType, 1, 2, 3))
+						CHOOSEVAR(matureType, finalPoly, finalFact, finalNumber) *= CHOOSEVAR(currentType, currentPoly, currentFact, currentNumber);
+
+					//If one of them is a number, we'll have the type of the other
+					else if((matureType & FARG_TYPE_NUMBER) || (currentType & FARG_TYPE_NUMBER))
+					{
+						if(matureType & FARG_TYPE_NUMBER)
+							migrateType(currentType, finalPoly, finalFact, finalNumber);
 						
-					case OP_PLUS:
-					{
-						//Perform plus
-						break;
+						CHOOSEVAR(matureType, finalPoly, finalFact, finalNumber) *= CHOOSEVAR(currentType, currentPoly, currentFact, currentNumber);
 					}
+					
+					else
+					{
+						if(matureType & (FARG_TYPE_NUMBER | FARG_TYPE_FACTORISED))
+							migrateType(FARG_TYPE_POLY, finalPoly, finalFact, finalNumber);
 						
-					case OP_MULT:
-					{
-						//PerformMult
-						break;
+						CHOOSEVAR(matureType, finalPoly, finalFact, finalNumber) *= CHOOSEVAR(currentType, currentPoly, currentFact, currentNumber);
 					}
-						
-					case OP_DIV:
-					{
-						//PerformDiv
-						break;
-					}
-						
-					default:
-					{
-						std::cerr << "Unexpected operand! (" << iter->previousOperator << ") Can't really dump the context, sorry :/";
-						error = true;
-						return;
-					}
+
+					break;
+				}
+					
+				default:
+				{
+					std::cerr << "Unexpected operand! (" << iter->previousOperator << ") Can't really dump the context, sorry :/";
+					error = true;
+					return;
 				}
 			}
 		}
-
-		polynome = final;
+		
+		if(matureType == FARG_TYPE_NUMBER)
+			numberPure = finalNumber;
+		
+		else if(matureType == FARG_TYPE_FACTORISED)
+			polynomeFact = finalFact;
+		
+		else
+			polynomePure = finalPoly;
 	}
 	
 	isMature = true;
 	isFunction = isContainer = false;
 
+}
+
+void Entity::migrateType(uint8_t newType, Polynomial & finalPoly, PolynomialFact & finalFact, Complex::complexN & finalNumber)
+{
+	if((matureType & FARG_TYPE_DIV_RESULT) || (newType & FARG_TYPE_DIV_RESULT) || CHOOSEVAR(newType, 1, 2, 3) != CHOOSEVAR(matureType, 1, 2, 3))
+		return;
+
+	CHOOSEVAR(newType, finalPoly, finalFact, finalNumber) += CHOOSEVAR(matureType, finalPoly, finalFact, finalNumber);
+	
+	if(matureType & FARG_TYPE_NUMBER)
+		finalNumber = Complex::complexN(0, 0);
+
+	else if(matureType & FARG_TYPE_FACTORISED)
+		finalFact = PolynomialFact::PolynomialFact();
+	
+	else
+		finalPoly = Polynomial::Polynomial();
+	
+	newType = matureType;
 }
 
 bool Entity::checkArgumentConsistency(bool & error) const

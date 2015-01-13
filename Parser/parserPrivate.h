@@ -24,9 +24,25 @@ enum
 
 enum
 {
-	PREV_OP_NONE = 0,
-	PREV_OP_MULT,
-	PREV_OP_SUM
+	FCODE_EXPAND		= 0,
+	FCODE_FACTOR		= 1,
+	FCODE_EVALUATE		= 2,
+	FCODE_INTERPOLATE	= 3,
+	FCODE_COMPOSITION	= 4,
+	FCODE_TEST			= 5,
+	FCODE_DUMP			= 6,
+	INVALID_FUNCTION_ID = UINT_MAX
+} FUNCTION_CODES;
+
+enum
+{
+	FARG_TYPE_POLY_NOFACT 	= 1 << 0,
+	FARG_TYPE_FACTORISED	= 1 << 1,
+	FARG_TYPE_POLY			= FARG_TYPE_POLY_NOFACT | FARG_TYPE_FACTORISED,
+	FARG_TYPE_REAL			= 1 << 2,
+	FARG_TYPE_COMPLEX		= 1 << 3,
+	FARG_TYPE_NUMBER		= FARG_TYPE_REAL | FARG_TYPE_COMPLEX,
+	FARG_TYPE_DIV_RESULT	= 1 << 4
 };
 
 enum
@@ -51,6 +67,7 @@ class Entity
 
 	uint functionCode;
 	
+	void migrateType(uint8_t newType, Polynomial & finalPoly, PolynomialFact & finalFact, Complex::complexN & finalNumber);
 	bool checkArgumentConsistency(bool & error) const;
 	
 public:
@@ -64,6 +81,7 @@ public:
 	Polynomial polynomePure;
 	PolynomialFact polynomeFact;
 	Complex::complexN numberPure;
+	divResult divisionResult;
 
 	//Relationship
 	uint8_t previousOperator;
