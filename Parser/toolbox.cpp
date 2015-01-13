@@ -1,6 +1,6 @@
 #include "parserPrivate.h"
 
-complexType getNumber(std::string string)
+complexType getNumber(std::string string, bool & error)
 {
 	complexType complex;
 	size_t size = string.size();
@@ -22,9 +22,22 @@ complexType getNumber(std::string string)
 		size--;
 	}
 
-	if(string.at(0) == '[')
+	if(string.at(0) == '{')
 	{
-		value = 0;
+		if(string.at(string.size() - 1) != '}')
+		{
+			error = true;
+			value = 0;
+		}
+		else
+		{
+			//Valid variable, yay
+			string = string.substr(1, string.size() - 2);	//Strip {}
+			
+			//Magic, we parse the variable
+			
+			value = 42;
+		}
 	}
 	else
 		value = atof(string.c_str());
@@ -230,7 +243,13 @@ bool isFunction(std::string level, uint & functionCode, bool & error)
 	functionCode = Catalog::getIDOfFunction(level);
 	
 	if(functionCode == INVALID_FUNCTION_ID)
+	{
+		error = true;
+#ifdef VERBOSE
+		std::cerr << "Invalid function name: " << level << '\n';
+#endif
 		return false;
+	}
 	
 	return true;
 }

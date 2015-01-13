@@ -22,12 +22,24 @@ Entity parserCore(std::string input, int opType, bool & error)
 			input = input.erase(0, pos+1);
 	}
 	
-	output = _parseEntity(input, error);
+	output = _parseEntity(input, opType == TYPE_OP_CALCUL, error);
+	
+#ifdef MATURE
+	if(!error)
+	{
+		output.maturation(error);
+	}
+#endif
+	
+	if(opType == TYPE_OP_ALLOC)
+	{
+		Catalog::setVariableValue(receiver, output.polynome);
+	}
 	
 	return output;
 }
 
-Entity _parseEntity(std::string level, bool & error)
+Entity _parseEntity(std::string level, bool canDiv, bool & error)
 {
 	Entity output;
 	std::vector<uint> positions;
@@ -35,7 +47,7 @@ Entity _parseEntity(std::string level, bool & error)
 	
 	if(havePlusOnLevel(level, positions) || haveMultOnLevel(level, positions))
 	{
-		std::vector<Entity> parsedLevel = _parseLevel(level, positions, error);
+		std::vector<Entity> parsedLevel = _parseLevel(level, positions, canDiv, error);
 		if(!error)
 			output.setSublevel(parsedLevel);
 	}
@@ -62,10 +74,10 @@ Entity _parseEntity(std::string level, bool & error)
 				error = true;
 			}
 			else if(nbArg == 1)
-				output = _parseEntity(argument, error);
+				output = _parseEntity(argument, false, error);
 			else
 			{
-				std::vector<Entity> subLevel = _parseLevel(argument, positions, error);
+				std::vector<Entity> subLevel = _parseLevel(argument, positions, false, error);
 				if(!error)
 					output.setSublevel(subLevel);
 			}
@@ -91,7 +103,7 @@ Entity _parseEntity(std::string level, bool & error)
 	return output;
 }
 
-std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, bool & error)
+std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, bool canDiv, bool & error)
 {
 	std::vector<Entity> output;
 	
@@ -113,9 +125,9 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 	for(std::vector<uint>::const_iterator current = positions.begin(); current != positions.end(); ++current)
 	{
 #ifdef VERBOSE
-		std::cout << "Current portion: " << level.substr(basePos, *current-basePos) << '\n';
+		std::cout << "[LOG]: Current portion: " << level.substr(basePos, *current-basePos) << '\n';
 #endif
-		entity = _parseEntity(level.substr(basePos, *current - basePos), error);
+		entity = _parseEntity(level.substr(basePos, *current - basePos), false, error);
 		if(error)
 			break;
 
@@ -142,6 +154,10 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 
 					break;
 				}
+			}
+			else if(entity.previousOperator == OP_DIV)
+			{
+				//Division is a pretty special cas, and can't be used except on the highest level
 			}
 		}
 		

@@ -31,7 +31,7 @@ struct grammar : qi::grammar<Iterator, internalMonome(), ascii::space_type>
 		
 		//Will parse a single component
 		variable = -char_("i")
-		>> ((char_("{") >> (+char_("a-zA-Z_0-9") - char_("}")) >> char_("}"))
+		>> ((char_("{") >> (+(ascii::char_ - char_("}"))) >> char_("}"))
 			| (+char_("0-9") >> -(char_(".") >> +char_("0-9"))))
 		>> -char_("i");
 		
@@ -71,7 +71,7 @@ monome parseMonome(std::string str, bool & error)
 
 	if (success && begin == end)
 	{
-		output.coef = combineComplexParser(getNumber(internMonome.coefficientBegin), getNumber(internMonome.coefficientEnd));
+		output.coef = combineComplexParser(getNumber(internMonome.coefficientBegin, error), getNumber(internMonome.coefficientEnd, error));
 		output.exponent = internMonome.x_exponent;
 	}
 	else

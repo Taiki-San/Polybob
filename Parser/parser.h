@@ -23,6 +23,20 @@ enum
 	FARG_TYPE_NUMBER		= 1 << 2
 };
 
+//Private types
+
+struct _parserComplex
+{
+	double coefReal;
+	double coefComplex;
+};
+
+struct _parserMonome
+{
+	struct _parserComplex coef;
+	int exponent;
+};
+
 	class Catalog
 	{
 		std::string cacheRaw, cacheName;
@@ -44,8 +58,14 @@ enum
 		static std::string getFunctionName(uint ID);
 		static std::vector<uint> getArgumentType(uint ID);
 		
+		//Variable tools
 		static bool variableName(std::string input, std::string & variableName);
 		static bool isVariable(std::string input);
+		
+		//Variable manipulation
+		static bool variableExist(std::string variableName);
+		static std::vector<struct _parserMonome> variableValue(std::string variableName, bool & error);
+		static void setVariableValue(std::string variableName, std::vector<struct _parserMonome>);
 		
 		static void registerCache(std::string rawInput, std::string variableName);
 		static bool getCache(std::string & raw, std::string & name);

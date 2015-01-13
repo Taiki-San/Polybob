@@ -78,7 +78,7 @@ bool Catalog::variableName(std::string input, std::string & variableName)
 	//If no cache, we get the length, strip the borders
 	length = input.length();
 	
-	if(length <= 2 || input[0] != '[' || input[length - 1] != ']')
+	if(length <= 2 || input[0] != '{' || input[length - 1] != '}')
 		return false;
 	
 	variableName = input.substr(1, length - 2);
@@ -86,7 +86,7 @@ bool Catalog::variableName(std::string input, std::string & variableName)
 	//We check if there is no illegal character in the variable name
 	for(std::string::const_iterator iterator = variableName.begin(); iterator != input.end(); ++iterator)
 	{
-		if(*iterator == '[' || *iterator == ']')
+		if(*iterator == '{' || *iterator == '}')
 			return false;
 	}
 	
@@ -99,6 +99,25 @@ bool Catalog::isVariable(std::string input)
 {
 	std::string unused;
 	return Catalog::variableName(input, unused);
+}
+
+//Now, let's have a look at our variables
+
+#warning "TODO"
+bool Catalog::variableExist(std::string variableName)
+{
+	return false;
+}
+
+std::vector<monome> Catalog::variableValue(std::string variableName, bool & error)
+{
+	std::vector<monome> lol;
+	return lol;
+}
+
+void Catalog::setVariableValue(std::string variableName, std::vector<monome>)
+{
+	
 }
 
 //Micro caching

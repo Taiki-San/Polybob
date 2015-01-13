@@ -37,18 +37,9 @@ enum
 
 #pragma mark Structures
 
-typedef struct complex
-{
-	double coefReal;
-	double coefComplex;
-}complexType;
+typedef struct _parserComplex complexType;
 
-typedef struct monome
-{
-	complexType coef;
-	int exponent;
-
-} monome;
+typedef struct _parserMonome monome;
 
 #pragma mark Entity
 
@@ -102,8 +93,8 @@ public:
 #pragma mark Parser core
 
 Entity parserCore(std::string input, int opType, bool & error);
-Entity _parseEntity(std::string level, bool & error);
-std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, bool & error);
+Entity _parseEntity(std::string level, bool canDiv, bool & error);
+std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, bool canDiv, bool & error);
 monome parseMonome(std::string str, bool & error);
 
 #pragma mark Parser utils
@@ -116,7 +107,7 @@ uint8_t getPreviousOP(char operand);
 
 #pragma mark Spirit utils
 
-complexType getNumber(std::string string);
+complexType getNumber(std::string string, bool & error);
 complexType combineComplexParser(complexType a, complexType b);
 
 #pragma mark Sanitization
