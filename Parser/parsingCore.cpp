@@ -151,13 +151,17 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 #ifdef VERBOSE
 					std::cerr << "Invalid power: " << level.substr(basePos, *current) << " ~ " << *current << '\n';
 #endif
-
 					break;
 				}
 			}
-			else if(entity.previousOperator == OP_DIV)
+			else if(entity.previousOperator == OP_DIV && !canDiv)
 			{
 				//Division is a pretty special cas, and can't be used except on the highest level
+				error = true;
+#ifdef VERBOSE
+				std::cerr << "Invalid division, because of the specifications, it can only be used when directly outputed"<< '\n';
+#endif
+
 			}
 		}
 		
