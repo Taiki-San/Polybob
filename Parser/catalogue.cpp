@@ -7,6 +7,8 @@ Catalog& Catalog::Instance()
 	return instance;
 }
 
+#define MAX_FUNC_ID FCODE_DUMP
+
 Catalog::Catalog()
 {
 	haveCache = false;
@@ -34,24 +36,29 @@ uint Catalog::getIDOfFunction(std::string name)
 
 uint Catalog::getNbArgsForID(uint ID)
 {
-	Catalog & instance = Catalog::Instance();
-	if (ID >= instance.functionArgumentNumber.size())
-	{
+	if (ID > MAX_FUNC_ID)
 		return INVALID_FUNCTION_ID;
-	}
 	
-	return instance.functionArgumentNumber[ID];
+	return Catalog::Instance().functionArgumentNumber[ID];
 }
 
 std::string Catalog::getFunctionName(uint ID)
 {
-	Catalog & instance = Catalog::Instance();
-	if (ID >= instance.functionNames.size())
-	{
+	if (ID > MAX_FUNC_ID)
 		return "";
+	
+	return Catalog::Instance().functionNames[ID];
+}
+
+std::vector<uint> Catalog::getArgumentType(uint ID)
+{
+	if (ID > MAX_FUNC_ID)
+	{
+		std::vector<uint> empty;
+		return empty;
 	}
 	
-	return instance.functionNames[ID];
+	return Catalog::Instance().functionArgumentType[ID];
 }
 
 #pragma mark Variable related

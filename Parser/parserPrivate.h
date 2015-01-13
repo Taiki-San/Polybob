@@ -12,12 +12,12 @@
 
 enum
 {
-	OP_NONE,
-	OP_POWER,
-	OP_MULT,
-	OP_DIV,
-	OP_PLUS,
-	OP_MINUS
+	OP_NONE		= 1 << 0,
+	OP_POWER	= 1 << 1,
+	OP_MULT		= 1 << 2,
+	OP_DIV		= 1 << 3,
+	OP_PLUS		= 1 << 4,
+	OP_MINUS	= 1 << 5
 
 } OPERATORS;
 
@@ -61,14 +61,20 @@ class Entity
 
 	uint functionCode;
 	
+	bool checkArgumentConsistency(bool & error) const;
+	
 public:
 	
+	//Public content
+	std::vector<monome> polynome;
 	monome _monome;
 
+	//Relationship
 	uint8_t previousOperator;
 	int power;
 	bool initialized;
-	
+
+	//Setters
 	Entity();
 	bool setMonome(monome entry);
 	bool setSublevel(std::vector<Entity> entry);
@@ -76,11 +82,20 @@ public:
 	
 	void updatePowerOfLast(int power);
 	
+	//Getter
+	uint getType() const;
 	bool isReal() const;
-	
+	bool isFactorisedPoly() const;
+
+	//IO
 	void print(uint depth)	const;
 	void print()		const;
 	void printMonome()	const;
+	
+	//Maturation
+	void maturation(bool & error);
+	void executeFunction(bool & error);
+	bool isMature;
 };
 
 #pragma mark - Declarations -

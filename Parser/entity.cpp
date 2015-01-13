@@ -57,6 +57,55 @@ bool Entity::isReal() const
 	return !isContainer && _monome.exponent == SPIRIT_DEFAULT_POWER_VALUE && _monome.coef.coefComplex == 0;
 }
 
+bool Entity::isFactorisedPoly() const
+{
+	if((previousOperator & (OP_MULT | OP_NONE)) && isMature && polynome.size() <= 2)
+	{
+		if(polynome.size() == 1)
+			return true;
+		else
+			return polynome[0].exponent == 0 || polynome[1].exponent == 0;
+	}
+	
+	return false;
+}
+
+#pragma mark - Getter
+
+#warning "To confirm"
+uint Entity::getType() const
+{
+	if(!isContainer)
+	{
+		if(polynome.size() == 1)
+		{
+			if(polynome[0].exponent == 0)
+				return FARG_TYPE_NUMBER;
+			else	//x^4
+				return FARG_TYPE_POLY_NOFACT;
+		}
+		
+		//x^2 + 3 isn't a factorised form, however, (x^2 + 3)^2 is
+		else if(isFactorisedPoly() && power > 1)
+			return FARG_TYPE_FACTORISED;
+	}
+	
+	else
+	{
+		bool noDisparency = true;
+		
+		for (std::vector<Entity>::const_iterator iter = subLevel.begin(); iter != subLevel.end() && noDisparency; ++iter)
+		{
+			noDisparency = iter->isFactorisedPoly();
+		}
+		
+		if(noDisparency)
+			return FARG_TYPE_FACTORISED;
+	}
+	
+	return FARG_TYPE_POLY_NOFACT;
+}
+
 #pragma mark - IO
 
 void Entity::print() const
@@ -133,3 +182,153 @@ void Entity::printMonome() const
 	else
 		std::cout << '\n';
 }
+
+#pragma mark - Maturation
+
+void Entity::maturation(bool & error)
+{
+	//We mature the sub-elems
+	if(isContainer)
+	{
+		for(std::vector<Entity>::iterator iter = subLevel.begin(); iter != subLevel.end(); ++iter)
+		{
+			iter->maturation(error);
+
+			if(error)
+				return;
+		}
+	}
+	
+	//Now, let's evaluate the content
+	if(isFunction)
+	{
+		executeFunction(error);
+		
+		if(error)
+			return;
+	}
+	else if(!isContainer)
+	{
+		polynome.push_back(_monome);
+	}
+	else
+	{
+		//Awesome, we're in the tricky part, here are out assumptions:
+		//	Sublevel is consistent in priority, so no need to prioritize
+		//	We don't really care about our power, it'll get evaluated later (by the parent)
+		//	My earlier parser didn't messed with me :X
+		
+		bool firstRun = true;
+		std::vector<monome> currentStage, final;
+		
+		for(std::vector<Entity>::const_iterator iter = subLevel.begin(); iter != subLevel.end(); ++iter)
+		{
+			currentStage = iter->polynome;
+			
+#warning "Need linking to core the polynomial operations"
+
+			if(iter->power > 1)
+			{
+				std::vector<monome> multiplier = currentStage;
+				
+				for(uint i = 1, power = iter->power; i < power; i++)
+				{
+					//Perform currentStage * multiplier
+				}
+			}
+			
+			if(firstRun)
+			{
+				firstRun = false;
+				final = currentStage;
+			}
+			
+			else
+			{
+				switch (iter->previousOperator)
+				{
+					case OP_MINUS:
+					{
+						//Perform minus
+						break;
+					}
+						
+					case OP_PLUS:
+					{
+						//Perform plus
+						break;
+					}
+						
+					case OP_MULT:
+					{
+						//PerformMult
+						break;
+					}
+						
+					case OP_DIV:
+					{
+						//PerformDiv
+						break;
+					}
+						
+					default:
+					{
+						std::cerr << "Unexpected operand! (" << iter->previousOperator << ") Can't really dump the context, sorry :/";
+						error = true;
+						return;
+					}
+				}
+			}
+		}
+
+		polynome = final;
+	}
+	
+	isMature = true;
+	isFunction = isContainer = false;
+
+}
+
+bool Entity::checkArgumentConsistency(bool & error) const
+{
+	uint nbArg = Catalog::getNbArgsForID(functionCode), curType, pos = 0;
+	std::vector<uint> typing = Catalog::getArgumentType(functionCode);
+	std::vector<Entity>::const_iterator iter = subLevel.begin();
+	
+	//We set curType earlier so in the case where nbArg == 0 (wildcard), we already have curType
+	for(curType = typing[0]; pos < nbArg && iter != subLevel.end(); ++iter)
+	{
+		if((iter->getType() & curType) == 0)
+		{
+			error = true;
+			std::cerr << "Invalid argument for function " << Catalog::getFunctionName(functionCode) << ", " << iter->getType() << " instead of " << curType << '\n';
+			return false;
+		}
+		
+		curType = typing[++pos];
+	}
+
+	//This loop will only be considered if nbArg != actual length, that can only happen (because sanitization) when nbArg == 0
+	while(iter != subLevel.end())
+	{
+		if((iter->getType() & curType) == 0)
+		{
+			error = true;
+			std::cerr << "Invalid argument for function " << Catalog::getFunctionName(functionCode) << ", " << iter->getType() << " instead of " << curType << '\n';
+			return false;
+		}
+		
+		++iter;
+	}
+
+	return true;
+}
+
+void Entity::executeFunction(bool & error)
+{
+	if(!checkArgumentConsistency(error))
+		return;
+	
+#warning "We need to put our arg in common variables and send them to the appropriate function"
+}
+
