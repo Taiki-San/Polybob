@@ -1,8 +1,16 @@
 #include "parserPrivate.h"
 
-Entity parserCore(std::string input, int opType, bool & error)
+Entity parserCore(std::string input, bool & error)
 {
 	Entity output;
+	int opType = TYPE_OP_INVALID;
+
+	if(!checkString(input) || (opType = syntaxAnalysis(input)) == TYPE_OP_INVALID)
+	{
+		error = true;
+		return output;
+	}
+	
 	std::string receiver;
 	
 	//If we want to alloc the result of the operation, no need to evaluate what's at the right of the equality

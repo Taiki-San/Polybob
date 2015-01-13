@@ -92,7 +92,6 @@ public:
 #pragma mark - Declarations -
 #pragma mark Parser core
 
-Entity parserCore(std::string input, int opType, bool & error);
 Entity _parseEntity(std::string level, bool canDiv, bool & error);
 std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, bool canDiv, bool & error);
 monome parseMonome(std::string str, bool & error);

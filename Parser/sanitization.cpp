@@ -185,6 +185,8 @@ int syntaxAnalysis(std::string input)
 		std::string substring = input.substr(0, index);
 		if(Catalog::isVariable(substring))
 			return TYPE_OP_ALLOC;
+		
+		std::cerr << "Invalid request";
 		return TYPE_OP_INVALID;
 	}
 	

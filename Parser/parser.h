@@ -37,6 +37,8 @@ struct _parserMonome
 	int exponent;
 };
 
+	class Entity;
+
 	class Catalog
 	{
 		std::string cacheRaw, cacheName;
@@ -71,6 +73,6 @@ struct _parserMonome
 		static bool getCache(std::string & raw, std::string & name);
 	};
 
-	int parserEntrypoint();
+	Entity parserCore(std::string input, bool & error);
 
 #endif
