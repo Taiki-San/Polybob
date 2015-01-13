@@ -1,35 +1,42 @@
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+
+#include "wrapper.h"
 
 #include "linenoise.h"
 #include "interface.h"
 
+
+#define HIST_FILENAME ".polyBobHistory"
+
 int main(int argc, char **argv)
 {
-	char *line;
-	char *prgname = argv[0];
+	char* line;
+	//char* prgname = argv[0];
 	unsigned int promptNb = 1;
 	char promptMsg[100];
-
-	printLogo();
+   
+    printLogo();
 
 	/* Set the completion callback. This will be called every time the
 	 * user uses the <tab> key. */
 	linenoiseSetCompletionCallback(completion);
 
 	/* Load history from file.*/
-	linenoiseHistoryLoad("history.txt"); /* Load the history at startup */
+	linenoiseHistoryLoad(HIST_FILENAME); /* Load the history at startup */
 
 	snprintf(promptMsg, 100, "%s[%d]: ", "\033[0m", promptNb); 
 	while((line = linenoise(promptMsg)) != NULL)
 	{    
 		linenoiseHistoryAdd(line); /* Add to the history. */
-		linenoiseHistorySave("history.txt"); /* Save the history on disk. */
+		linenoiseHistorySave(HIST_FILENAME); /* Save the history on disk. */
 		/* Do something with the string. */
+        rmSuperscript(line);
+
 		if(line[0] == '/')
 		{
-			parseCommand(line+1);    
+			parseCommand(&(line[1]));    
 		}
 		else if(!strcmp(line, "exit"))
 		{

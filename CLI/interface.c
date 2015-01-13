@@ -1,9 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/ioctl.h>
-
-#include "linenoise.h"
+#include "interface.h"
 
 #define RED  "\033[22;31m"
 #define RESET  "\033[0m"
