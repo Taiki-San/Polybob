@@ -127,7 +127,7 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 	
 	Entity entity;
 	uint basePos = 0;
-	bool dropEntity = false;
+	bool dropEntity = false, doesDiv = false;
 	
 	//Positions contain the index of operators
 	for(std::vector<uint>::const_iterator current = positions.begin(); current != positions.end(); ++current)
@@ -135,6 +135,16 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 #ifdef VERBOSE
 		std::cout << "[LOG]: Current portion: " << level.substr(basePos, *current-basePos) << '\n';
 #endif
+		//We're trying to add something after divising, that is not allowed
+		if(doesDiv)
+		{
+			error = true;
+#ifdef VERBOSE
+			std::cerr << "Invalid division, because of the specifications, it can only be used when directly outputed"<< '\n';
+#endif
+			break;
+		}
+		
 		entity = _parseEntity(level.substr(basePos, *current - basePos), false, error);
 		if(error)
 			break;
@@ -162,14 +172,22 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 					break;
 				}
 			}
-			else if(entity.previousOperator == OP_DIV && !canDiv)
+			else if(entity.previousOperator == OP_DIV)
 			{
 				//Division is a pretty special cas, and can't be used except on the highest level
-				error = true;
+				if(canDiv)
+				{
+					canDiv = false;
+					doesDiv = true;
+				}
+				else
+				{
+					error = true;
 #ifdef VERBOSE
-				std::cerr << "Invalid division, because of the specifications, it can only be used when directly outputed"<< '\n';
+					std::cerr << "Invalid division, because of the specifications, it can only be used when directly outputed"<< '\n';
 #endif
-
+					break;
+				}
 			}
 		}
 		
