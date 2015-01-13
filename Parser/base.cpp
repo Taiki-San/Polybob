@@ -1,6 +1,6 @@
 #include "parserPrivate.h"
 
-int parserEntrypoint()
+int main()
 {
 	std::cout << "/////////////////////////////////////////////////////////\n\n";
 	std::cout << "Expression parser...\n\n";
@@ -30,7 +30,17 @@ int parserEntrypoint()
 	return 0;
 }
 
-int main()
+void print(Entity entity)
 {
-	return parserEntrypoint();
+	entity.print();
+}
+
+bool haveVariableSuggestion(std::string begining, std::string & suggestion)
+{
+	return Catalog::haveVariableSuggestion(begining, suggestion);
+}
+
+bool haveFunctionSuggestion(std::string begining, std::string & suggestion)
+{
+	return Catalog::haveFunctionSuggestion(begining, suggestion);
 }

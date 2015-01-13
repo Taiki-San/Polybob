@@ -4,6 +4,7 @@
 #include <complex>
 #include <algorithm>
 #include "parser.h"
+#include "sharedWithCore.h"
 
 #define VERBOSE
 #define SPIRIT_DEFAULT_POWER_VALUE 0
@@ -37,7 +38,7 @@ enum
 
 #pragma mark Structures
 
-typedef _parserMonome monome;
+typedef struct Monomial monome;
 
 #pragma mark Entity
 
@@ -55,8 +56,14 @@ class Entity
 public:
 	
 	//Public content
-	std::vector<monome> polynome;
 	monome _monome;
+	std::vector<monome> polynome;
+	
+	//Mature
+	uint8_t matureType;
+	Polynomial polynomePure;
+	PolynomialFact polynomeFact;
+	Complex::complexN numberPure;
 
 	//Relationship
 	uint8_t previousOperator;
@@ -86,6 +93,46 @@ public:
 	void maturation(bool & error);
 	void executeFunction(bool & error);
 	bool isMature;
+};
+
+#pragma mark - Catalog
+
+class Catalog
+{
+	std::string cacheRaw, cacheName;
+	bool haveCache;
+	
+	std::vector<uint> functionCodes;
+	std::vector<std::string> functionNames;
+	std::vector<uint> functionArgumentNumber;
+	std::vector<std::vector<uint>> functionArgumentType;
+	
+	Catalog();
+	Catalog(Catalog const&);
+	
+public:
+	static Catalog& Instance();
+	
+	static uint getIDOfFunction(std::string name);
+	static uint getNbArgsForID(uint ID);
+	static std::string getFunctionName(uint ID);
+	static std::vector<uint> getArgumentType(uint ID);
+	
+	//Variable tools
+	static bool variableName(std::string input, std::string & variableName);
+	static bool isVariable(std::string input);
+	
+	//Auto-completion
+	static bool haveVariableSuggestion(std::string begining, std::string & suggestion);
+	static bool haveFunctionSuggestion(std::string begining, std::string & suggestion);
+	
+	//Variable manipulation
+	static bool variableExist(std::string variableName);
+	static std::vector<monome> variableValue(std::string variableName, bool & error);
+	static void setVariableValue(std::string variableName, std::vector<monome>);
+	
+	static void registerCache(std::string rawInput, std::string variableName);
+	static bool getCache(std::string & raw, std::string & name);
 };
 
 #pragma mark - Declarations -

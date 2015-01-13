@@ -101,9 +101,20 @@ bool Catalog::isVariable(std::string input)
 	return Catalog::variableName(input, unused);
 }
 
-//Now, let's have a look at our variables
-
+//Used by auto-completion
 #warning "TODO"
+
+bool Catalog::haveVariableSuggestion(std::string begining, std::string & suggestion)
+{
+	return false;
+}
+
+bool Catalog::haveFunctionSuggestion(std::string begining, std::string & suggestion)
+{
+	return false;
+}
+
+//Now, let's have a look at our variables
 bool Catalog::variableExist(std::string variableName)
 {
 	return false;
