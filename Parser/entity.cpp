@@ -78,7 +78,6 @@ bool Entity::isFactorisedPoly() const
 
 #pragma mark - Getter
 
-#warning "To confirm"
 uint Entity::getType() const
 {
 	if(!isContainer)
@@ -86,27 +85,31 @@ uint Entity::getType() const
 		if(polynome.size() == 1)
 		{
 			if(polynome[0].exponent == 0)
+			{
+				if(polynome[0].coef.coefReal == 0)
+					return FARG_TYPE_COMPLEX;
+
+				else if(polynome[0].coef.coefComplex == 0)
+					return FARG_TYPE_REAL;
+				
 				return FARG_TYPE_NUMBER;
+			}
 			else	//x^4
 				return FARG_TYPE_POLY_NOFACT;
 		}
 		
-		//x^2 + 3 isn't a factorised form, however, (x^2 + 3)^2 is
+		//x + 3 isn't a factorised form, however, (x + 3)^2 is
 		else if(isFactorisedPoly() && power > 1)
 			return FARG_TYPE_FACTORISED;
 	}
 	
 	else
 	{
-		bool noDisparency = true;
-		
 		for (std::vector<Entity>::const_iterator iter = subLevel.begin(); iter != subLevel.end() && noDisparency; ++iter)
 		{
-			noDisparency = iter->isFactorisedPoly();
+			if(!iter->isFactorisedPoly())
+				return FARG_TYPE_FACTORISED;
 		}
-		
-		if(noDisparency)
-			return FARG_TYPE_FACTORISED;
 	}
 	
 	return FARG_TYPE_POLY_NOFACT;

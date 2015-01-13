@@ -4,6 +4,8 @@ Entity parserCore(std::string input, bool & error)
 {
 	Entity output;
 	int opType = TYPE_OP_INVALID;
+	
+	input.erase(remove_if(input.begin(), input.end(), isspace), input.end());
 
 	if(!checkString(input) || (opType = syntaxAnalysis(input)) == TYPE_OP_INVALID)
 	{

@@ -16,8 +16,6 @@ int parserEntrypoint()
 			break;
 
 		//We remove every spaces, as they are no-op
-		str.erase(remove_if(str.begin(), str.end(), isspace), str.end());
-
 		bool error = false;
 
 		entity = parserCore(str, error);
