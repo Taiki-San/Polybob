@@ -76,6 +76,7 @@ public:
 	//Getter
 	uint getType() const;
 	bool isReal() const;
+	bool monomeCouldBePartFactorisedPoly(uint index) const;
 	bool isFactorisedPoly() const;
 
 	//IO

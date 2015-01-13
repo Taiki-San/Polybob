@@ -57,14 +57,20 @@ bool Entity::isReal() const
 	return !isContainer && _monome.exponent == SPIRIT_DEFAULT_POWER_VALUE && _monome.coef.coefComplex == 0;
 }
 
+bool Entity::monomeCouldBePartFactorisedPoly(uint index) const
+{
+	return (polynome[index].exponent == 1 && polynome[index].coef.coefReal == 1 && polynome[index].coef.coefComplex == 0) || polynome[index].exponent == 0;
+}
+
 bool Entity::isFactorisedPoly() const
 {
-	if((previousOperator & (OP_MULT | OP_NONE)) && isMature && polynome.size() <= 2)
+	if((previousOperator & (OP_MULT | OP_NONE)) && isMature && polynome.size() <= 2 && polynome[0].exponent < 2)
 	{
-		if(polynome.size() == 1)
-			return true;
-		else
-			return polynome[0].exponent == 0 || polynome[1].exponent == 0;
+		if(monomeCouldBePartFactorisedPoly(0))
+		{
+			if(polynome.size() == 1 || monomeCouldBePartFactorisedPoly(1))
+				return true;
+		}
 	}
 	
 	return false;
