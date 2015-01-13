@@ -2,6 +2,10 @@
 
 	#define PARSER_HEADER
 
+	#include <complex>
+	#include <sstream>
+	#include <cmath>
+
 	#define INVALID_FUNCTION_ID UINT_MAX
 
 enum
@@ -25,19 +29,34 @@ enum
 	FARG_TYPE_NUMBER		= FARG_TYPE_REAL | FARG_TYPE_COMPLEX
 };
 
+namespace Complex
+{
+	typedef std::complex<double> complexN;
+	
+	template<typename T> inline std::string toString(const std::complex<T> &x)
+	{
+		std::ostringstream s;
+		
+		s << "(" << x.real();
+		
+		if(x.imag() >= 0)
+			s << "+";
+		
+		s << x.imag() << "i)";
+		return s.str();
+	}
+}
+
+typedef struct Monomial
+{
+	Complex::complexN coeff;
+	unsigned int power;
+	
+	Monomial(const Complex::complexN &coeff, const unsigned int &power) : coeff(coeff), power(power) {}
+} _parserMonome;
+
+
 //Private types
-
-struct _parserComplex
-{
-	double coefReal;
-	double coefComplex;
-};
-
-struct _parserMonome
-{
-	struct _parserComplex coef;
-	int exponent;
-};
 
 	class Entity;
 
@@ -68,8 +87,8 @@ struct _parserMonome
 		
 		//Variable manipulation
 		static bool variableExist(std::string variableName);
-		static std::vector<struct _parserMonome> variableValue(std::string variableName, bool & error);
-		static void setVariableValue(std::string variableName, std::vector<struct _parserMonome>);
+		static std::vector<_parserMonome> variableValue(std::string variableName, bool & error);
+		static void setVariableValue(std::string variableName, std::vector<_parserMonome>);
 		
 		static void registerCache(std::string rawInput, std::string variableName);
 		static bool getCache(std::string & raw, std::string & name);

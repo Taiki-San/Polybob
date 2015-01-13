@@ -37,9 +37,7 @@ enum
 
 #pragma mark Structures
 
-typedef struct _parserComplex complexType;
-
-typedef struct _parserMonome monome;
+typedef _parserMonome monome;
 
 #pragma mark Entity
 
@@ -107,8 +105,7 @@ uint8_t getPreviousOP(char operand);
 
 #pragma mark Spirit utils
 
-complexType getNumber(std::string string, bool & error);
-complexType combineComplexParser(complexType a, complexType b);
+Complex::complexN getNumber(std::string string, bool & error);
 
 #pragma mark Sanitization
 

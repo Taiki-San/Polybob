@@ -1,8 +1,8 @@
 #include "parserPrivate.h"
 
-complexType getNumber(std::string string, bool & error)
+Complex::complexN getNumber(std::string string, bool & error)
 {
-	complexType complex;
+	Complex::complexN complex(0 , 0);
 	size_t size = string.size();
 	double value;
 	char haveI = 0;
@@ -52,40 +52,12 @@ complexType getNumber(std::string string, bool & error)
 	}
 
 	if(isComplex)
-	{
-		complex.coefReal = 0;
-		complex.coefComplex = value;
-	}
+		complex.imag(value);
+		
 	else
-	{
-		complex.coefReal = value;
-		complex.coefComplex = 0;
-	}
+		complex.real(value);
 
 	return complex;
-}
-
-complexType combineComplexParser(complexType a, complexType b)
-{
-	if(a.coefReal == 0 && b.coefReal == 0)
-	{
-		a.coefReal = a.coefComplex * b.coefComplex;
-		a.coefComplex = 0;
-	}
-
-	else if(a.coefComplex == 0 && b.coefComplex == 0)
-		a.coefReal *= b.coefReal;
-
-	else if(a.coefReal == 0)
-		a.coefComplex *= b.coefComplex;
-
-	else
-	{
-		a.coefComplex = a.coefReal * b.coefComplex;
-		a.coefReal = 0;
-	}
-
-	return a;
 }
 
 //Parser utils

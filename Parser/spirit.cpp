@@ -10,7 +10,7 @@ typedef struct localMonome
 {
 	std::string coefficientBegin;
 	std::string coefficientEnd;
-	uint x_exponent;
+	uint exponent;
 
 } internalMonome;
 
@@ -40,8 +40,8 @@ struct grammar : qi::grammar<Iterator, internalMonome(), ascii::space_type>
 		>>	(variable[phx::bind(&internalMonome::coefficientBegin, _val) = qi::_1]
 			 | eps[phx::bind(&internalMonome::coefficientBegin, _val) = "1"])
 		
-		>> (-char_("*") >> (exponent[phx::bind(&internalMonome::x_exponent, _val) = qi::_1]
-							| eps[phx::bind(&internalMonome::x_exponent, _val) = SPIRIT_DEFAULT_POWER_VALUE]))
+		>> (-char_("*") >> (exponent[phx::bind(&internalMonome::exponent, _val) = qi::_1]
+							| eps[phx::bind(&internalMonome::exponent, _val) = SPIRIT_DEFAULT_POWER_VALUE]))
 		
 		>>  (variable[phx::bind(&internalMonome::coefficientEnd, _val) = qi::_1]
 			 | eps[phx::bind(&internalMonome::coefficientEnd, _val) = "1"]);
@@ -64,24 +64,21 @@ monome parseMonome(std::string str, bool & error)
 	std::string::const_iterator begin = str.begin(), end = str.end();
 
 	internalMonome internMonome;
-	monome output;
 
 	//Actual parsing
 	bool success = phrase_parse(begin, end, grammar, space, internMonome);
 
 	if (success && begin == end)
 	{
-		output.coef = combineComplexParser(getNumber(internMonome.coefficientBegin, error), getNumber(internMonome.coefficientEnd, error));
-		output.exponent = internMonome.x_exponent;
-	}
-	else
-	{
-		error = true;
-#ifdef VERBOSE
-		std::string rest(begin, end);
-		std::cout << "Parsing failed, stopped at: \" " << rest << "\"" << " ~ full string: " << str << '\n';
-#endif
+		return monome(getNumber(internMonome.coefficientBegin, error) * getNumber(internMonome.coefficientEnd, error),
+					  internMonome.exponent);
 	}
 
-	return output;
+	error = true;
+#ifdef VERBOSE
+	std::string rest(begin, end);
+	std::cout << "Parsing failed, stopped at: \" " << rest << "\"" << " ~ full string: " << str << '\n';
+#endif
+
+	return monome(Complex::complexN(0, 0), 0);
 }

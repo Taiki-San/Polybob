@@ -2,7 +2,7 @@
 
 #define SEPARATOR '	'
 
-Entity::Entity()
+Entity::Entity() : _monome(Complex::complexN(0, 0), 0)
 {
 	initialized = false;
 	isContainer = isFunction = false;
@@ -54,17 +54,17 @@ void Entity::updatePowerOfLast(int _power)
 
 bool Entity::isReal() const
 {
-	return !isContainer && _monome.exponent == SPIRIT_DEFAULT_POWER_VALUE && _monome.coef.coefComplex == 0;
+	return !isContainer && _monome.power == SPIRIT_DEFAULT_POWER_VALUE && _monome.coeff.imag() == 0;
 }
 
 bool Entity::monomeCouldBePartFactorisedPoly(uint index) const
 {
-	return (polynome[index].exponent == 1 && polynome[index].coef.coefReal == 1 && polynome[index].coef.coefComplex == 0) || polynome[index].exponent == 0;
+	return (polynome[index].power == 1 && polynome[index].coeff.real() == 1 && polynome[index].coeff.imag() == 0) || polynome[index].power == 0;
 }
 
 bool Entity::isFactorisedPoly() const
 {
-	if((previousOperator & (OP_MULT | OP_NONE)) && isMature && polynome.size() <= 2 && polynome[0].exponent < 2)
+	if((previousOperator & (OP_MULT | OP_NONE)) && isMature && polynome.size() <= 2 && polynome[0].power < 2)
 	{
 		if(monomeCouldBePartFactorisedPoly(0))
 		{
@@ -84,12 +84,12 @@ uint Entity::getType() const
 	{
 		if(polynome.size() == 1)
 		{
-			if(polynome[0].exponent == 0)
+			if(polynome[0].power == 0)
 			{
-				if(polynome[0].coef.coefReal == 0)
+				if(polynome[0].coeff.real() == 0)
 					return FARG_TYPE_COMPLEX;
 
-				else if(polynome[0].coef.coefComplex == 0)
+				else if(polynome[0].coeff.imag() == 0)
 					return FARG_TYPE_REAL;
 				
 				return FARG_TYPE_NUMBER;
@@ -105,7 +105,7 @@ uint Entity::getType() const
 	
 	else
 	{
-		for (std::vector<Entity>::const_iterator iter = subLevel.begin(); iter != subLevel.end() && noDisparency; ++iter)
+		for (std::vector<Entity>::const_iterator iter = subLevel.begin(); iter != subLevel.end(); ++iter)
 		{
 			if(!iter->isFactorisedPoly())
 				return FARG_TYPE_FACTORISED;
@@ -169,24 +169,24 @@ void Entity::print(uint depth) const
 void Entity::printMonome() const
 {
 	std::cout << "coefficient: ";
-	if(_monome.coef.coefReal == 0 && _monome.coef.coefComplex == 0)
+	if(_monome.coeff.real() == 0 && _monome.coeff.imag() == 0)
 	{
 		std::cout << "0\n";
 		return;
 	}
 	
-	else if(_monome.coef.coefComplex == 0)
-		std::cout << _monome.coef.coefReal;
+	else if(_monome.coeff.imag() == 0)
+		std::cout << _monome.coeff.real();
 	
-	else if(_monome.coef.coefReal == 0)
-		std::cout << _monome.coef.coefComplex << 'i';
+	else if(_monome.coeff.real() == 0)
+		std::cout << _monome.coeff.imag() << 'i';
 	
 	else
-		std::cout << '(' << _monome.coef.coefReal << '+' << _monome.coef.coefComplex << "i)";
+		std::cout << '(' << _monome.coeff.real() << '+' << _monome.coeff.imag() << "i)";
 	
-	if(_monome.exponent > 1)
-		std::cout << "x^" << _monome.exponent << '\n';
-	else if(_monome.exponent == 1)
+	if(_monome.power > 1)
+		std::cout << "x^" << _monome.power << '\n';
+	else if(_monome.power == 1)
 		std::cout << "x\n";
 	else
 		std::cout << '\n';

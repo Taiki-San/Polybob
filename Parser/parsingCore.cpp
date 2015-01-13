@@ -162,7 +162,7 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 				if(entity.isReal())
 				{
 					
-					previous.updatePowerOfLast(int(entity._monome.coef.coefReal));
+					previous.updatePowerOfLast(int(entity._monome.coeff.real()));
 					dropEntity = true;
 				}
 				else	//We don't support weird powers...
