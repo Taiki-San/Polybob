@@ -1,10 +1,11 @@
 #include "wrapper.h"
 
+using namespace std;
+
 char* rmSuperscript(char* line)
 {
 	string str = line;
-	char key[][4] = {"⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"};
-	char replacement[3];
+	char key[][4] = {"⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"}, replacement[3];
 	int iter;
 
 	replacement[0] = '^';
@@ -18,18 +19,7 @@ char* rmSuperscript(char* line)
 			str.replace(iter, (j > 3 ? 3 : 2), replacement);		
 		}
 	}
-
-	strcpy(line, str.c_str());
-
-	return line;
-}
-
-void sendToParser(char* line)
-{
-	Entity input;
-	bool error;
-	bool &refError(error);
-	string str = line;
-
-	input.parserCore(str, refError);
+	
+	free(line);
+	return strdup(str.c_str());
 }

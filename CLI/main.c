@@ -40,11 +40,10 @@ int main(int argc, char **argv)
 			exit(0);
 
 		else if(line[0] != '\0')
-			sendToParser(line);
+			simpleParserAPI(line);
 
 		free(line);
-		promptNb++;
-		snprintf(promptMsg, 100, "[%d]: ", promptNb);
+		snprintf(promptMsg, 100, "[%d]: ", ++promptNb);
 	}
 	return 0;
 }

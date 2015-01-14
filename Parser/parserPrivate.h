@@ -3,7 +3,7 @@
 #include <vector>
 #include <complex>
 #include <algorithm>
-#include "parser.h"
+#include "../parser.h"
 #include "sharedWithCore.h"
 
 #define VERBOSE
