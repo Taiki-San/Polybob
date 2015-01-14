@@ -13,7 +13,6 @@
 int main(int argc, char **argv)
 {
 	char* line;
-	//char* prgname = argv[0];
 	unsigned int promptNb = 1;
 	char promptMsg[100];
    
@@ -35,17 +34,13 @@ int main(int argc, char **argv)
         rmSuperscript(line);
 
 		if(line[0] == '/')
-		{
-			parseCommand(&(line[1]));    
-		}
+			parseCommand(&(line[1]));
+
 		else if(!strcmp(line, "exit"))
-		{
 			exit(0);
-		}
+
 		else if(line[0] != '\0')
-		{
-			printf("echo: '%s'\n", line);
-		}
+			sendToParser(line);
 
 		free(line);
 		promptNb++;

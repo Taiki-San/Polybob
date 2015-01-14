@@ -23,3 +23,13 @@ char* rmSuperscript(char* line)
 
 	return line;
 }
+
+void sendToParser(char* line)
+{
+	Entity input;
+	bool error;
+	bool &refError(error);
+	string str = line;
+
+	input.parserCore(str, refError);
+}

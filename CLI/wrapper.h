@@ -6,8 +6,12 @@
 
 #include <string.h>
 
+#include "parser.h"
+
 using namespace std;
 
 char* rmSuperscript(char* line);
+
+void sendToParser(char* line);
 
 #endif
