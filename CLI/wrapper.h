@@ -11,8 +11,6 @@ using namespace std;
 
 #endif
 
-#include "../parser.h"
-
 char* rmSuperscript(char* line);
 
 #endif

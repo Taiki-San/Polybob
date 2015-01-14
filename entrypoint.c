@@ -2,11 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <iostream>
+#include <string>
+#include "parser.h"
 #include "CLI/wrapper.h"
 
 #include "CLI/linenoise.h"
 #include "CLI/interface.h"
-
 
 #define HIST_FILENAME ".polyBobHistory"
 

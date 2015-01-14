@@ -1,10 +1,8 @@
 #include "wrapper.h"
 
-using namespace std;
-
 char* rmSuperscript(char* line)
 {
-	string str = line;
+	std::string str = line;
 	char key[][4] = {"⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"}, replacement[3];
 	int iter;
 
