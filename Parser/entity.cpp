@@ -373,8 +373,17 @@ void Entity::maturation(bool & error)
 					
 				case OP_DIV:
 				{
-					divisionResult = CHOOSEVAR(matureType, finalPoly, finalFact, finalNumber) / CHOOSEVAR(currentType, currentPoly, currentFact, currentNumber);
-					currentType = FARG_TYPE_DIV_RESULT;
+					try
+					{
+						divisionResult = CHOOSEVAR(matureType, finalPoly, finalFact, finalNumber) / CHOOSEVAR(currentType, currentPoly, currentFact, currentNumber);
+						currentType = FARG_TYPE_DIV_RESULT;
+					}
+					catch (const std::exception & e)
+					{
+						std::cerr << e.what();
+						error = true;
+						return;
+					}
 					break;
 				}
 

@@ -30,6 +30,22 @@ int main()
 	return 0;
 }
 
+Entity parserCore(std::string input, bool & error)
+{
+	int opType = TYPE_OP_INVALID;
+	
+	input.erase(remove_if(input.begin(), input.end(), isspace), input.end());
+	
+	if(!checkString(input) || (opType = syntaxAnalysis(input)) == TYPE_OP_INVALID)
+	{
+		error = true;
+		Entity empty;
+		return empty;
+	}
+
+	return _parserCore(input, opType, error);
+}
+
 void print(Entity entity)
 {
 	entity.print();
