@@ -194,6 +194,9 @@ void Entity::printMonome() const
 
 #pragma mark - Maturation
 
+#define CHOOSEVAR(__type, __poly, __fact, __complex) ((__type & FARG_TYPE_FACTORISED) ? __fact : ((__type & FARG_TYPE_NUMBER) ? __complex : __poly))
+
+#if 0
 void Entity::maturation(bool & error)
 {
 	//We mature the sub-elems
@@ -286,9 +289,7 @@ void Entity::maturation(bool & error)
 		
 		if(currentType & FARG_TYPE_NUMBER)
 		{
-			finalNumber += iter->numberPure;
-			for(uint i = 1; i < currentPower; i++)
-				finalNumber *= iter->numberPure;
+			finalNumber = std::pow(iter->numberPure, currentPower);
 		}
 		
 		else if(currentType & FARG_TYPE_FACTORISED)
@@ -301,9 +302,7 @@ void Entity::maturation(bool & error)
 		
 		else
 		{
-			finalPoly = iter->polynomePure;
-			for(uint i = 1; i < currentPower; i++)
-				finalPoly *= iter->polynomePure;
+			finalPoly = iter->polynomePure ^ currentPower;
 		}
 		
 		for(++iter; iter != subLevel.end() && currentType != FARG_TYPE_DIV_RESULT; ++iter)
@@ -315,15 +314,14 @@ void Entity::maturation(bool & error)
 			if(fullyFactorised && (currentType & (FARG_TYPE_FACTORISED | FARG_TYPE_NUMBER)) == 0)
 			{
 				currentPoly += finalFact;
+				finalFact = PolynomialFact::PolynomialFact();
 				fullyFactorised = false;
 			}
 
 			//We transfer in the appropriate receiver
 			if(currentType & FARG_TYPE_NUMBER)
 			{
-				currentNumber = iter->numberPure;
-				for(uint i = 1; i < currentPower; i++)
-					currentNumber *= iter->numberPure;
+				currentNumber = std::pow(iter->numberPure, currentPower);
 			}
 			
 			else if(currentType & FARG_TYPE_FACTORISED)
@@ -334,16 +332,11 @@ void Entity::maturation(bool & error)
 			
 			else
 			{
-				currentPoly = iter->polynomePure;
-				for(uint i = 1; i < currentPower; i++)
-					currentPoly *= iter->polynomePure;
+				currentPoly = iter->polynomePure ^ currentPower;
 			}
 			
 			//Now, witchcraft, power are applied, we now have to combine them
 			//I rely a lot on a macro in order to get the proper argument depending of the type
-			
-#define CHOOSEVAR(__type, __poly, __fact, __complex) ((__type & FARG_TYPE_FACTORISED) ? __fact : ((__type & FARG_TYPE_NUMBER) ? __complex : __poly))
-
 			
 			switch (iter->previousOperator)
 			{
@@ -455,6 +448,8 @@ void Entity::migrateType(uint8_t newType, Polynomial & finalPoly, PolynomialFact
 	newType = matureType;
 }
 
+#endif
+
 bool Entity::checkArgumentConsistency(bool & error) const
 {
 	uint nbArg = Catalog::getNbArgsForID(functionCode), curType, pos = 0;
@@ -495,6 +490,76 @@ void Entity::executeFunction(bool & error)
 	if(!checkArgumentConsistency(error))
 		return;
 	
-#warning "We need to put our arg in common variables and send them to the appropriate function"
+	uint retType = Catalog::getFuncReturnType(functionCode), argPower = subLevel[0].power;
+	
+	if(argPower == 0)	argPower = 1;
+
+	//We apply power on the fly, so things get pretty dirty
+	
+	switch (functionCode)
+	{
+		case FCODE_EXPAND:
+		{
+			CHOOSEVAR(retType, polynomePure, polynomeFact, numberPure) = (subLevel[0].polynomeFact ^ argPower).expand();
+			break;
+		}
+			
+		case FCODE_FACTOR:
+		{
+			if(subLevel[0].matureType & FARG_TYPE_FACTORISED)
+				CHOOSEVAR(retType, polynomePure, polynomeFact, numberPure) = (subLevel[0].polynomeFact ^ argPower).factor();
+			else
+				CHOOSEVAR(retType, polynomePure, polynomeFact, numberPure) = (subLevel[0].polynomeFact ^ argPower).factor();
+			break;
+		}
+			
+		case FCODE_EVALUATE:
+		{
+			uint arg2Power = subLevel[1].power;
+			if(arg2Power == 0)		arg2Power = 1;
+			
+			if(subLevel[0].matureType & FARG_TYPE_FACTORISED)
+				CHOOSEVAR(retType, polynomePure, polynomeFact, numberPure) = (subLevel[0].polynomeFact ^ argPower).eval(pow(subLevel[1].numberPure, arg2Power));
+			else
+				CHOOSEVAR(retType, polynomePure, polynomeFact, numberPure) = (subLevel[0].polynomeFact ^ argPower).eval(pow(subLevel[1].numberPure, arg2Power));
+			break;
+		}
+			
+		case FCODE_INTERPOLATE:
+		{
+			std::vector<Complex::complexN> argument;
+			
+			for(std::vector<Entity>::const_iterator iter = subLevel.begin(); iter != subLevel.end(); ++iter)
+			{
+				uint power = iter->power;
+				Complex::complexN current = iter->numberPure;
+				
+				argument.push_back(pow(current, power == 0 ? 1 : power));
+			}
+			
+			CHOOSEVAR(retType, polynomePure, polynomeFact, numberPure) = polynomePure.composition(argument);
+			
+			break;
+		}
+		
+		case FCODE_COMPOSITION:
+		{
+			uint arg2Power = subLevel[1].power;
+			if(arg2Power == 0)		arg2Power = 1;
+			
+			if(subLevel[0].matureType & FARG_TYPE_FACTORISED)
+				CHOOSEVAR(retType, polynomePure, polynomeFact, numberPure) = (subLevel[0].polynomeFact ^ argPower).compose(((subLevel[1].matureType & FARG_TYPE_FACTORISED) ? subLevel[1].polynomeFact : subLevel[1].polynomePure) ^ arg2Power);
+			else
+				CHOOSEVAR(retType, polynomePure, polynomeFact, numberPure) = (subLevel[0].polynomePure ^ argPower).compose(((subLevel[1].matureType & FARG_TYPE_FACTORISED) ? subLevel[1].polynomeFact : subLevel[1].polynomePure) ^ arg2Power);
+			break;
+		}
+			
+		default:
+		{
+			return;
+		}
+	}
+	
+	matureType = retType;
 }
 

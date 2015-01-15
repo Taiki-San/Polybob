@@ -17,6 +17,7 @@ Catalog::Catalog()
 	functionNames = {"expand", "factor", "evaluate", "interpolate", "composition", "test", "dump"};
 	functionArgumentNumber = {1, 1, 2, 0, 2};
 	functionArgumentType = {{FARG_TYPE_FACTORISED}, {FARG_TYPE_POLY_NOFACT}, {FARG_TYPE_POLY, FARG_TYPE_NUMBER}, {FARG_TYPE_REAL}, {FARG_TYPE_POLY, FARG_TYPE_POLY}};
+	functionReturnType = {FARG_TYPE_POLY_NOFACT, FARG_TYPE_FACTORISED, FARG_TYPE_NUMBER, FARG_TYPE_POLY, FARG_TYPE_POLY};
 }
 
 #pragma mark Function related
@@ -59,6 +60,14 @@ std::vector<uint> Catalog::getArgumentType(uint ID)
 	}
 	
 	return Catalog::Instance().functionArgumentType[ID];
+}
+
+uint Catalog::getFuncReturnType(uint ID)
+{
+	if(ID > MAX_FUNC_ID)
+		return FARG_TYPE_POLY;
+		
+	return Catalog::Instance().functionReturnType[ID];
 }
 
 #pragma mark Variable related

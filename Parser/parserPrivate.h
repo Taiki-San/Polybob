@@ -124,6 +124,7 @@ class Catalog
 	std::vector<std::string> functionNames;
 	std::vector<uint> functionArgumentNumber;
 	std::vector<std::vector<uint>> functionArgumentType;
+	std::vector<uint> functionReturnType;
 	
 	Catalog();
 	Catalog(Catalog const&);
@@ -135,6 +136,7 @@ public:
 	static uint getNbArgsForID(uint ID);
 	static std::string getFunctionName(uint ID);
 	static std::vector<uint> getArgumentType(uint ID);
+	static uint getFuncReturnType(uint ID);
 	
 	//Variable tools
 	static bool variableName(std::string input, std::string & variableName);

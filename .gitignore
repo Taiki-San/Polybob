@@ -1,0 +1,5 @@
+*xcode*
+DerivedData/
+
+obj/
+Libraries/
