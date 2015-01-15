@@ -10,10 +10,14 @@ void completion(const char *buf, linenoiseCompletions *lc)
 		linenoiseAddCompletion(lc, "/help");
 		linenoiseAddCompletion(lc, "/historylen");
 	}
-    else if(buf[0] == 'e')
-    {
-        linenoiseAddCompletion(lc, "exit");
-    }
+	else if(buf[0] == 'e')
+	{
+		linenoiseAddCompletion(lc, "exit");
+	}
+	else if(buf[0] == 'q')
+	{
+		linenoiseAddCompletion(lc, "quit");
+	}
 }
 
 void parseCommand(const char *command)
@@ -48,22 +52,28 @@ void parseCommand(const char *command)
 
 void printLogo()
 {
-    int i;
     struct winsize w;
     ioctl(0, TIOCGWINSZ, &w);
-    int nbSpace = (w.ws_col/2)-20;
-    char text[8000] = ""; 
-
-    if(nbSpace<0)
+    int nbSpace = w.ws_col / 2  - 20;
+	
+    if(nbSpace < 0 && nbSpace > -15)
     {
         printf("%sPolyBob\n\n",RED);
     }
+	else if(nbSpace < -15)
+	{
+		printf("42");
+	}
     else
     {
+		int i;
+		char text[nbSpace + 1];
+		
         for(i = 0 ; i < nbSpace ; i++)
-        {
-            strcat(text, " ");
-        }
+            text[i] = ' ';
+		
+		text[nbSpace] = 0;
+		
         printf("%s%s ____       _       ____        _\n%s|  _ \\ ___ | |_   _| __ )  ___ | |__\n%s| |_) / _ \\| | | | |  _ \\ / _ \\| '_ \\ \n%s|  __/ (_) | | |_| | |_) | (_) | |_) |\n%s|_|   \\___/|_|\\__, |____/ \\___/|_.__/\n%s              |___/                  \n%s", RED, text, text, text, text, text, text, RESET);
     }
     fflush(stdout);
