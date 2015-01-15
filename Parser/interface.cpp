@@ -54,7 +54,7 @@ int main()
 
 void simpleParserAPI(char * cString)
 {
-	bool error;
+	bool error = false;
 	std::string string = cString;
 	
 	Entity input = parserCore(string, error);

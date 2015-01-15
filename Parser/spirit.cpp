@@ -56,11 +56,12 @@ struct grammar : qi::grammar<Iterator, internalMonome(), ascii::space_type>
  *	Parser entrypoint
  */
 
-Entity _parseSubElement(VARIABLE element)
+Entity _parseSubElement(VARIABLE element, int prevOP)
 {
 	Entity stage = Entity();
 	stage.isMature = true;
 	stage.matureType = element.type;
+	stage.previousOperator = prevOP;
 	
 	if(element.type & FARG_TYPE_NUMBER)
 		stage.numberPure = element.number;
@@ -88,7 +89,7 @@ Entity parseMonome(std::string str, bool & error)
 
 	if (success && begin == end)
 	{
-		VARIABLE first = getNumber(internMonome.coefficientBegin, error), second = getNumber(internMonome.coefficientEnd, error);
+		VARIABLE first = convertSpirit(internMonome.coefficientBegin, error), second = convertSpirit(internMonome.coefficientEnd, error);
 		Entity output;
 		
 		if((first.type & FARG_TYPE_NUMBER) && (second.type & FARG_TYPE_NUMBER))
@@ -97,21 +98,29 @@ Entity parseMonome(std::string str, bool & error)
 		}
 		else
 		{
+			bool firstCatch = true;
 			Entity stage;
 			std::vector<Entity> sublevel;
 			
 			if(!(first.type & FARG_TYPE_NUMBER) || (first.number != Complex::complexN(1, 0)))
-				sublevel.push_back(_parseSubElement(first));
-			
+			{
+				sublevel.push_back(_parseSubElement(first, OP_NONE));
+				firstCatch = false;
+			}
+		
 			if(internMonome.exponent > 0)
 			{
 				Entity stage;
 				stage.setMonome(monome(1, internMonome.exponent));
+				
+				stage.previousOperator = firstCatch ? OP_NONE : OP_MULT;
+				firstCatch = false;
+				
 				sublevel.push_back(stage);
 			}
 			
 			if(!(second.type & FARG_TYPE_NUMBER) || (second.number != Complex::complexN(1, 0)))
-				sublevel.push_back(_parseSubElement(second));
+				sublevel.push_back(_parseSubElement(second, firstCatch ? OP_NONE : OP_MULT));
 
 			output.setSublevel(sublevel);
 		}

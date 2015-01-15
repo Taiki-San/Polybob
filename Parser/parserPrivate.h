@@ -195,7 +195,7 @@ uint8_t getPreviousOP(char operand);
 
 #pragma mark Spirit utils
 
-VARIABLE getNumber(std::string string, bool & error);
+VARIABLE convertSpirit(std::string string, bool & error);
 
 #pragma mark Sanitization
 

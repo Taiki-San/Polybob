@@ -1,6 +1,6 @@
 #include "parserPrivate.h"
 
-VARIABLE getNumber(std::string string, bool & error)
+VARIABLE convertSpirit(std::string string, bool & error)
 {
 	VARIABLE variable;
 	
