@@ -38,6 +38,10 @@ void parseCommand(const char *command)
 		int len = atoi(command+10);
 		linenoiseHistorySetMaxLen(len);
 	}
+	else if(!strcmp(command,"fluffle"))
+	{
+		easterEgg();
+	}
     else
         printf("'%s' : Unknown command\n", command);
 }

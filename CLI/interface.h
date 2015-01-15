@@ -12,4 +12,6 @@ void completion(const char *buf, linenoiseCompletions *lc);
 void parseCommand(const char *command);
 void printLogo();
 
+void easterEgg();
+
 #endif
