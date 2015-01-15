@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 #include <complex>
 #include <algorithm>
 #include "../parser.h"
@@ -115,6 +116,21 @@ public:
 
 #pragma mark - Catalog
 
+struct variableMetadata
+{
+	uint8_t type;
+	uint index;
+};
+
+typedef struct variableContainer
+{
+	Polynomial polynomial;
+	PolynomialFact polynomialFact;
+	Complex::complexN number;
+	
+	uint8_t type;
+} VARIABLE;
+
 class Catalog
 {
 	std::string cacheRaw, cacheName;
@@ -126,9 +142,14 @@ class Catalog
 	std::vector<std::vector<uint>> functionArgumentType;
 	std::vector<uint> functionReturnType;
 	
+	std::vector<std::string> variableNames;
+	std::vector<VARIABLE> variableContent;
+	
 	Catalog();
 	Catalog(Catalog const&);
-	
+
+	static bool findSuggestion(std::string begining, std::vector<std::string> source, std::string & suggestion);
+
 public:
 	static Catalog& Instance();
 	
@@ -147,9 +168,8 @@ public:
 	static bool haveFunctionSuggestion(std::string begining, std::string & suggestion);
 	
 	//Variable manipulation
-	static bool variableExist(std::string variableName);
-	static std::vector<monome> variableValue(std::string variableName, bool & error);
-	static void setVariableValue(std::string variableName, std::vector<monome>);
+	static VARIABLE variableValue(std::string variableName, bool & error);
+	static void setVariableValue(std::string variableName, VARIABLE content);
 	
 	static void registerCache(std::string rawInput, std::string variableName);
 	static bool getCache(std::string & raw, std::string & name);
@@ -161,7 +181,7 @@ public:
 Entity _parserCore(std::string input, int opType, bool & error);
 Entity _parseEntity(std::string level, bool canDiv, bool & error);
 std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, bool canDiv, bool & error);
-monome parseMonome(std::string str, bool & error);
+Entity parseMonome(std::string str, bool & error);
 
 #pragma mark Parser utils
 
@@ -173,7 +193,7 @@ uint8_t getPreviousOP(char operand);
 
 #pragma mark Spirit utils
 
-Complex::complexN getNumber(std::string string, bool & error);
+VARIABLE getNumber(std::string string, bool & error);
 
 #pragma mark Sanitization
 

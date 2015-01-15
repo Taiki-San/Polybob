@@ -56,7 +56,25 @@ struct grammar : qi::grammar<Iterator, internalMonome(), ascii::space_type>
  *	Parser entrypoint
  */
 
-monome parseMonome(std::string str, bool & error)
+Entity _parseSubElement(VARIABLE element)
+{
+	Entity stage = Entity();
+	stage.isMature = true;
+	stage.matureType = element.type;
+	
+	if(element.type & FARG_TYPE_NUMBER)
+		stage.numberPure = element.number;
+	
+	else if(element.type & FARG_TYPE_FACTORISED)
+		stage.polynomeFact = element.polynomialFact;
+	
+	else
+		stage.polynomePure = element.polynomial;
+	
+	return stage;
+}
+
+Entity parseMonome(std::string str, bool & error)
 {
 	grammar<std::string::const_iterator> grammar;
 	boost::spirit::ascii::space_type space;
@@ -70,8 +88,34 @@ monome parseMonome(std::string str, bool & error)
 
 	if (success && begin == end)
 	{
-		return monome(getNumber(internMonome.coefficientBegin, error) * getNumber(internMonome.coefficientEnd, error),
-					  internMonome.exponent);
+		VARIABLE first = getNumber(internMonome.coefficientBegin, error), second = getNumber(internMonome.coefficientEnd, error);
+		Entity output;
+		
+		if((first.type & FARG_TYPE_NUMBER) && (second.type & FARG_TYPE_NUMBER))
+		{
+			output.setMonome(monome(first.number * second.number, internMonome.exponent));
+		}
+		else
+		{
+			Entity stage;
+			std::vector<Entity> sublevel;
+			
+			if(!(first.type & FARG_TYPE_NUMBER) || (first.number != Complex::complexN(1, 0)))
+				sublevel.push_back(_parseSubElement(first));
+			
+			if(internMonome.exponent > 0)
+			{
+				Entity stage;
+				stage.setMonome(monome(1, internMonome.exponent));
+				sublevel.push_back(stage);
+			}
+			
+			if(!(second.type & FARG_TYPE_NUMBER) || (second.number != Complex::complexN(1, 0)))
+				sublevel.push_back(_parseSubElement(second));
+
+			output.setSublevel(sublevel);
+		}
+		return output;
 	}
 
 	error = true;
@@ -79,6 +123,6 @@ monome parseMonome(std::string str, bool & error)
 	std::string rest(begin, end);
 	std::cout << "Parsing failed, stopped at: \" " << rest << "\"" << " ~ full string: " << str << '\n';
 #endif
-
-	return monome(Complex::complexN(0, 0), 0);
+	
+	return Entity();
 }

@@ -196,7 +196,6 @@ void Entity::printMonome() const
 
 #define CHOOSEVAR(__type, __poly, __fact, __complex) ((__type & FARG_TYPE_FACTORISED) ? __fact : ((__type & FARG_TYPE_NUMBER) ? __complex : __poly))
 
-#if 0
 void Entity::maturation(bool & error)
 {
 	//We mature the sub-elems
@@ -383,7 +382,14 @@ void Entity::maturation(bool & error)
 				case OP_MULT:
 				{
 					if(CHOOSEVAR(matureType, 1, 2, 3) == CHOOSEVAR(currentType, 1, 2, 3))
-						CHOOSEVAR(matureType, finalPoly, finalFact, finalNumber) *= CHOOSEVAR(currentType, currentPoly, currentFact, currentNumber);
+					{
+						if(matureType & FARG_TYPE_NUMBER)
+							finalNumber *= currentNumber;
+						else if(matureType & FARG_TYPE_FACTORISED)
+							finalFact *= currentFact;
+						else
+							finalPoly *= currentPoly;
+					}
 
 					//If one of them is a number, we'll have the type of the other
 					else if((matureType & FARG_TYPE_NUMBER) || (currentType & FARG_TYPE_NUMBER))
@@ -391,7 +397,12 @@ void Entity::maturation(bool & error)
 						if(matureType & FARG_TYPE_NUMBER)
 							migrateType(currentType, finalPoly, finalFact, finalNumber);
 						
-						CHOOSEVAR(matureType, finalPoly, finalFact, finalNumber) *= CHOOSEVAR(currentType, currentPoly, currentFact, currentNumber);
+						if(matureType & FARG_TYPE_NUMBER)
+							finalNumber *= currentNumber;
+						else if(matureType & FARG_TYPE_FACTORISED)
+							finalFact *= currentFact;
+						else
+							finalPoly *= currentPoly;
 					}
 					
 					else
@@ -399,7 +410,7 @@ void Entity::maturation(bool & error)
 						if(matureType & (FARG_TYPE_NUMBER | FARG_TYPE_FACTORISED))
 							migrateType(FARG_TYPE_POLY, finalPoly, finalFact, finalNumber);
 						
-						CHOOSEVAR(matureType, finalPoly, finalFact, finalNumber) *= CHOOSEVAR(currentType, currentPoly, currentFact, currentNumber);
+						finalPoly *= CHOOSEVAR(currentType, currentPoly, currentFact, currentNumber);
 					}
 
 					break;
@@ -447,8 +458,6 @@ void Entity::migrateType(uint8_t newType, Polynomial & finalPoly, PolynomialFact
 	
 	newType = matureType;
 }
-
-#endif
 
 bool Entity::checkArgumentConsistency(bool & error) const
 {

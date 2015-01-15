@@ -34,7 +34,19 @@ Entity _parserCore(std::string input, int opType, bool & error)
 	
 	if(opType == TYPE_OP_ALLOC)
 	{
-		Catalog::setVariableValue(receiver, output.polynome);
+		VARIABLE content;
+		
+		content.type = output.matureType;
+		if(content.type & FARG_TYPE_NUMBER)
+			content.number = output.numberPure;
+		
+		else if(content.type & FARG_TYPE_FACTORISED)
+			content.polynomialFact = output.polynomeFact;
+		
+		else
+			content.polynomial = output.polynomePure;
+		
+		Catalog::setVariableValue(receiver, content);
 	}
 	
 	return output;
@@ -96,9 +108,7 @@ Entity _parseEntity(std::string level, bool canDiv, bool & error)
 	}
 	else if(!error)
 	{
-		monome tmp = parseMonome(level, error);
-		if(!error)
-			output.setMonome(tmp);
+		output = parseMonome(level, error);
 	}
 	
 	return output;

@@ -11,31 +11,9 @@
  *	Placeholder until real classes are added
  */
 
-namespace Complex
-{
-	typedef std::complex<double> complexN;
-	
-	template<typename T> inline std::string toString(const std::complex<T> &x)
-	{
-		std::ostringstream s;
-		
-		s << "(" << x.real();
-		
-		if(x.imag() >= 0)
-			s << "+";
-		
-		s << x.imag() << "i)";
-		return s.str();
-	}
-}
-
-struct Monomial
-{
-	Complex::complexN coeff;
-	uint power;
-	
-	Monomial(const Complex::complexN &coeff, const unsigned int &power) : coeff(coeff), power(power) {}
-};
+#include "../Maths/complex.h"
+#include "../Maths/monomial.h"
+#include "../Maths/polynomial.h"
 
 typedef struct factorisedElem
 {
@@ -50,26 +28,7 @@ typedef struct divResult
 	
 } divResult;
 
-typedef std::vector<Monomial> vectorMonomials_t;
 typedef std::vector<factorisedElem> vectorFact_t;
-
-//Generic
-class Polynomial
-{
-public:
-	/*
-	 * Par convention, le degré d’un polynôme nul est -∞. Ici, on réserve UINT_MAX
-	 * pour cet usage.
-	 */
-	static const unsigned int ZERO_POLYNOMIAL_DEGREE = UINT_MAX;
-	
-	//Création d’un polynôme nul
-	Polynomial();
-	//Création d’un polynôme avec les monômes donnés en argument
-	Polynomial(vectorMonomials_t monomials);
-	//Création d’un polynôme à partir d’un autre polynôme donné en argument
-	Polynomial(const Polynomial &poly);
-};
 
 //Factorised
 class PolynomialFact

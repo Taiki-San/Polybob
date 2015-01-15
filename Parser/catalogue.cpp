@@ -111,33 +111,99 @@ bool Catalog::isVariable(std::string input)
 }
 
 //Used by auto-completion
-#warning "TODO"
 
 bool Catalog::haveVariableSuggestion(std::string begining, std::string & suggestion)
 {
-	return false;
+	Catalog & instance = Catalog::Instance();
+	return findSuggestion(begining, instance.functionNames, suggestion);;
 }
 
 bool Catalog::haveFunctionSuggestion(std::string begining, std::string & suggestion)
 {
-	return false;
+	Catalog & instance = Catalog::Instance();
+	return findSuggestion(begining, instance.functionNames, suggestion);
+}
+
+bool Catalog::findSuggestion(std::string begining, std::vector<std::string> source, std::string & suggestion)
+{
+	if(source.size() == 0)
+		return false;
+	
+	uint matchPosition = UINT_MAX, counter = 0;
+	
+	for(std::vector<std::string>::const_iterator iter = source.begin(); iter != source.end(); ++iter, ++counter)
+	{
+		if(!iter->compare(0, begining.length(), begining))
+		{
+			//First match
+			if(matchPosition == UINT_MAX)
+				matchPosition = counter;
+			
+			//Not, we stop right now
+			else
+				return false;
+		}
+	}
+	
+	try
+	{
+		suggestion = source.at(matchPosition);
+	}
+	catch (const std::exception & e)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 //Now, let's have a look at our variables
-bool Catalog::variableExist(std::string variableName)
+VARIABLE Catalog::variableValue(std::string variableName, bool & error)
 {
-	return false;
-}
-
-std::vector<monome> Catalog::variableValue(std::string variableName, bool & error)
-{
-	std::vector<monome> lol;
-	return lol;
-}
-
-void Catalog::setVariableValue(std::string variableName, std::vector<monome>)
-{
+	Catalog & instance = Catalog::Instance();
 	
+	std::vector<std::string>::const_iterator iter = instance.variableNames.begin(), end = instance.variableNames.end();
+	
+	for(uint index = 0; iter != end; index++)
+	{
+		if(*iter == variableName)
+		{
+			try
+			{
+				return 	instance.variableContent.at(index);
+			}
+			catch (std::exception & e)
+			{
+				error = true;
+				VARIABLE output;
+				return output;
+			}
+		}
+	}
+	
+	error = true;
+	
+	VARIABLE output;
+	return output;
+}
+
+void Catalog::setVariableValue(std::string variableName, VARIABLE content)
+{
+	Catalog & instance = Catalog::Instance();
+	
+	std::vector<std::string>::const_iterator iter = instance.variableNames.begin(), end = instance.variableNames.end();
+	uint index = 0;
+	
+	for(; iter != end; index++)
+	{
+		if(*iter == variableName)
+		{
+			instance.variableContent[index] = content;
+		}
+	}
+	
+	instance.variableNames.push_back(variableName);
+	instance.variableContent.push_back(content);
 }
 
 //Micro caching

@@ -1,13 +1,23 @@
 #include "parserPrivate.h"
 
-Complex::complexN getNumber(std::string string, bool & error)
+VARIABLE getNumber(std::string string, bool & error)
 {
-	Complex::complexN complex(0 , 0);
+	VARIABLE variable;
+	
 	size_t size = string.size();
 	double value;
 	char haveI = 0;
 	bool isComplex;
+	
+	if(size == 0)
+	{
+		variable.type = FARG_TYPE_REAL;
+		variable.number.real(1);
+		return variable;
+	}
 
+	variable.type = FARG_TYPE_NUMBER;
+	
 	if(string.at(0) == 'i')
 	{
 		haveI++;
@@ -36,7 +46,23 @@ Complex::complexN getNumber(std::string string, bool & error)
 			
 			//Magic, we parse the variable
 			
-			value = 42;
+			variable = Catalog::variableValue(string, error);
+			
+			if(!error && haveI)
+			{
+				Complex::complexN complex(haveI == 2 ? -1 : 0, haveI == 1 ? 1 : 0);
+				
+				if(variable.type & FARG_TYPE_NUMBER)
+					variable.number *= complex;
+				
+				else if(variable.type & FARG_TYPE_FACTORISED)
+					variable.polynomialFact *= complex;
+				
+				else
+					variable.polynomial *= complex;
+			}
+			
+			return variable;
 		}
 	}
 	else
@@ -52,12 +78,18 @@ Complex::complexN getNumber(std::string string, bool & error)
 	}
 
 	if(isComplex)
-		complex.imag(value);
-		
+	{
+		variable.number.imag(value);
+		variable.type = FARG_TYPE_COMPLEX;
+	}
+	
 	else
-		complex.real(value);
+	{
+		variable.number.real(value);
+		variable.type = FARG_TYPE_REAL;
+	}
 
-	return complex;
+	return variable;
 }
 
 //Parser utils
