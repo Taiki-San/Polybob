@@ -2,53 +2,97 @@
 
 Entity _parserCore(std::string input, int opType, bool & error)
 {
-	Entity output;
+	Entity output, auxiliary;
 	
 	std::string receiver;
 	
 	//If we want to alloc the result of the operation, no need to evaluate what's at the right of the equality
-	if(opType == TYPE_OP_ALLOC)
+	if(opType == TYPE_OP_ALLOC || opType == TYPE_OP_COMPARE)
 	{
 		size_t pos = input.find('=');
 		
-		if(!Catalog::variableName(input.substr(0, pos), receiver))
+		//We cut the string in two parts
+		std::string part1 = input.substr(0, pos);
+		input = input.erase(0, pos+1);
+		
+		if(opType == TYPE_OP_ALLOC)
 		{
-			error = true;
+			if(!Catalog::variableName(input, receiver))
+			{
+				error = true;
 #ifdef VERBOSE
-			std::cerr << "No variable of name " << input.substr(0, pos) << '\n';
+				std::cerr << "No variable of name " << input << '\n';
 #endif
-			return output;
+				return output;
+			}
 		}
 		else
-			input = input.erase(0, pos+1);
+		{
+			input.erase(0, 1);	//We remove the second =
+			auxiliary = _parseEntity(part1, true, error);
+			
+			if(error)
+				return output;
+			
+			auxiliary.maturation(error);
+			
+			if(error)
+				return output;
+		}
 	}
 	
 	output = _parseEntity(input, opType == TYPE_OP_CALCUL, error);
 	
-#ifdef MATURE
 	if(!error)
 	{
 		output.maturation(error);
+		
+		if(!error)
+		{
+			if(opType == TYPE_OP_ALLOC)
+			{
+				VARIABLE content;
+				
+				content.type = output.matureType;
+				if(content.type & FARG_TYPE_NUMBER)
+					content.number = output.numberPure;
+				
+				else if(content.type & FARG_TYPE_FACTORISED)
+					content.polynomialFact = output.polynomeFact;
+				
+				else
+					content.polynomial = output.polynomePure;
+				
+				Catalog::setVariableValue(receiver, content);
+			}
+			else if(opType == TYPE_OP_COMPARE)
+			{
+				bool equal = false;
+				//We can compare auxiliary and output
+				if(auxiliary.matureType == output.matureType)
+				{
+					if(output.matureType & FARG_TYPE_NUMBER)
+						equal = output.numberPure == auxiliary.numberPure;
+
+					else if(output.matureType & FARG_TYPE_FACTORISED)
+						equal = output.polynomeFact == auxiliary.polynomeFact;
+					
+					else
+						equal = output.polynomePure == auxiliary.polynomePure;
+				}
+				
+				if(equal)
+					std::cout << "Those equations are equal\n";
+				
+				else
+					std::cout << "Those equations are not equal\n";
+			}
+			else if(opType == TYPE_OP_CALCUL)
+			{
+				output.print();
+			}
+		}
 	}
-#endif
-	
-	if(opType == TYPE_OP_ALLOC)
-	{
-		VARIABLE content;
-		
-		content.type = output.matureType;
-		if(content.type & FARG_TYPE_NUMBER)
-			content.number = output.numberPure;
-		
-		else if(content.type & FARG_TYPE_FACTORISED)
-			content.polynomialFact = output.polynomeFact;
-		
-		else
-			content.polynomial = output.polynomePure;
-		
-		Catalog::setVariableValue(receiver, content);
-	}
-	
 	return output;
 }
 

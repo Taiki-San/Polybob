@@ -48,9 +48,11 @@ enum
 
 enum
 {
-	TYPE_OP_INVALID = 0,
-	TYPE_OP_ALLOC = 0x1,
-	TYPE_OP_CALCUL = 0x2,
+	TYPE_OP_INVALID 		= 0,
+	TYPE_OP_ALLOC 			= 0x1,
+	TYPE_OP_CALCUL 			= 0x2,
+	TYPE_OP_CALCUL_SILENT 	= 0x3,
+	TYPE_OP_COMPARE 		= 0x4
 };
 
 #pragma mark Structures
