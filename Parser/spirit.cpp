@@ -75,7 +75,7 @@ Entity _parseSubElement(VARIABLE element, int prevOP)
 	return stage;
 }
 
-Entity parseMonome(std::string str, bool & error)
+Entity parseMonome(std::string str)
 {
 	grammar<std::string::const_iterator> grammar;
 	boost::spirit::ascii::space_type space;
@@ -89,7 +89,7 @@ Entity parseMonome(std::string str, bool & error)
 
 	if (success && begin == end)
 	{
-		VARIABLE first = convertSpirit(internMonome.coefficientBegin, error), second = convertSpirit(internMonome.coefficientEnd, error);
+		VARIABLE first = convertSpirit(internMonome.coefficientBegin), second = convertSpirit(internMonome.coefficientEnd);
 		Entity output;
 		
 		if((first.type & FARG_TYPE_NUMBER) && (second.type & FARG_TYPE_NUMBER))
@@ -127,11 +127,9 @@ Entity parseMonome(std::string str, bool & error)
 		return output;
 	}
 
-	error = true;
-#ifdef VERBOSE
-	std::string rest(begin, end);
-	std::cout << "Parsing failed, stopped at: \" " << rest << "\"" << " ~ full string: " << str << '\n';
-#endif
+	std::stringstream error;
+	error << "Parsing failed, stopped at: \" " << std::string(begin, end) << "\"" << " ~ full string: " << str;
+	throw std::invalid_argument(error.str());
 	
 	return Entity();
 }

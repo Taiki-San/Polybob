@@ -158,7 +158,7 @@ bool Catalog::findSuggestion(std::string begining, std::vector<std::string> sour
 }
 
 //Now, let's have a look at our variables
-VARIABLE Catalog::variableValue(std::string variableName, bool & error)
+VARIABLE Catalog::variableValue(std::string variableName)
 {
 	Catalog & instance = Catalog::Instance();
 	
@@ -174,17 +174,14 @@ VARIABLE Catalog::variableValue(std::string variableName, bool & error)
 			}
 			catch (std::exception & e)
 			{
-				error = true;
-				VARIABLE output;
-				return output;
+				break;
 			}
 		}
 	}
 	
-	error = true;
-	
-	VARIABLE output;
-	return output;
+	std::stringstream error;
+	error << "Invalid variable access, something went really wrong with '" << variableName << '\'';
+	throw std::invalid_argument(error.str());
 }
 
 void Catalog::setVariableValue(std::string variableName, VARIABLE content)

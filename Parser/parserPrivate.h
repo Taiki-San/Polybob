@@ -48,7 +48,6 @@ enum
 
 enum
 {
-	TYPE_OP_INVALID 		= 0,
 	TYPE_OP_ALLOC 			= 0x1,
 	TYPE_OP_CALCUL 			= 0x2,
 	TYPE_OP_CALCUL_SILENT 	= 0x3,
@@ -71,7 +70,7 @@ class Entity
 	uint functionCode;
 	
 	void migrateType(uint8_t newType, Polynomial & finalPoly, PolynomialFact & finalFact, Complex::complexN & finalNumber);
-	bool checkArgumentConsistency(bool & error) const;
+	bool checkArgumentConsistency() const;
 	
 public:
 	
@@ -111,8 +110,8 @@ public:
 	void printMonome()	const;
 	
 	//Maturation
-	void maturation(bool & error);
-	void executeFunction(bool & error);
+	void maturation();
+	void executeFunction();
 	bool isMature;
 };
 
@@ -170,7 +169,7 @@ public:
 	static bool haveFunctionSuggestion(std::string begining, std::string & suggestion);
 	
 	//Variable manipulation
-	static VARIABLE variableValue(std::string variableName, bool & error);
+	static VARIABLE variableValue(std::string variableName);
 	static void setVariableValue(std::string variableName, VARIABLE content);
 	
 	static void registerCache(std::string rawInput, std::string variableName);
@@ -180,25 +179,25 @@ public:
 #pragma mark - Declarations -
 #pragma mark Parser core
 
-Entity _parserCore(std::string input, int opType, bool & error);
-Entity _parseEntity(std::string level, bool canDiv, bool & error);
-std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, bool canDiv, bool & error);
-Entity parseMonome(std::string str, bool & error);
+Entity _parserCore(std::string input, int opType);
+Entity _parseEntity(std::string level, bool canDiv);
+std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, bool canDiv);
+Entity parseMonome(std::string str);
 
 #pragma mark Parser utils
 
 bool havePlusOnLevel(std::string level, std::vector<uint> & positions);
 bool haveMultOnLevel(std::string level, std::vector<uint> & positions);
-bool isFunction(std::string level, uint & functionCode, bool & error);
+bool isFunction(std::string level, uint & functionCode);
 void separateFunctionArgs(std::string level, std::vector<uint> & positions);
 uint8_t getPreviousOP(char operand);
 
 #pragma mark Spirit utils
 
-VARIABLE convertSpirit(std::string string, bool & error);
+VARIABLE convertSpirit(std::string string);
 
 #pragma mark Sanitization
 
-bool checkString(std::string input);
+void checkString(std::string input);
 int syntaxAnalysis(std::string input);
 

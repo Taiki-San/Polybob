@@ -1,6 +1,6 @@
 #include "parserPrivate.h"
 
-VARIABLE convertSpirit(std::string string, bool & error)
+VARIABLE convertSpirit(std::string string)
 {
 	VARIABLE variable;
 	
@@ -36,8 +36,9 @@ VARIABLE convertSpirit(std::string string, bool & error)
 	{
 		if(string.at(string.size() - 1) != '}')
 		{
-			error = true;
-			value = 0;
+			std::stringstream error;
+			error << "Invalid syntax in block " << string;
+			throw std::invalid_argument(error.str());
 		}
 		else
 		{
@@ -46,9 +47,9 @@ VARIABLE convertSpirit(std::string string, bool & error)
 			
 			//Magic, we parse the variable
 			
-			variable = Catalog::variableValue(string, error);
+			variable = Catalog::variableValue(string);
 			
-			if(!error && haveI)
+			if(haveI)
 			{
 				Complex::complexN complex(haveI == 2 ? -1 : 0, haveI == 1 ? 1 : 0);
 				
@@ -207,7 +208,7 @@ bool haveMultOnLevel(std::string level, std::vector<uint> & positions)
 	return haveFoundSomething;
 }
 
-bool isFunction(std::string level, uint & functionCode, bool & error)
+bool isFunction(std::string level, uint & functionCode)
 {
 	//Not finishing as a function
 	if(level[level.length()-1] != ']')
@@ -248,10 +249,9 @@ bool isFunction(std::string level, uint & functionCode, bool & error)
 	
 	if(functionCode == INVALID_FUNCTION_ID)
 	{
-		error = true;
-#ifdef VERBOSE
-		std::cerr << "Invalid function name: " << level << '\n';
-#endif
+		std::stringstream error;
+		error << "Invalid function name: " << level;
+		throw std::invalid_argument(error.str());
 		return false;
 	}
 	

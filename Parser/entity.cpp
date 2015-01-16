@@ -7,7 +7,7 @@ Entity::Entity() : _monome(Complex::complexN(0, 0), 0)
 	initialized = false;
 	isContainer = isFunction = false;
 	previousOperator = OP_NONE;
-	power = 0;
+	power = 1;
 }
 
 bool Entity::setMonome(monome entry)
@@ -196,28 +196,19 @@ void Entity::printMonome() const
 
 #define CHOOSEVAR(__type, __poly, __fact, __complex) ((__type & FARG_TYPE_FACTORISED) ? __fact : ((__type & FARG_TYPE_NUMBER) ? __complex : __poly))
 
-void Entity::maturation(bool & error)
+void Entity::maturation()
 {
 	//We mature the sub-elems
 	if(isContainer)
 	{
 		for(std::vector<Entity>::iterator iter = subLevel.begin(); iter != subLevel.end(); ++iter)
-		{
-			iter->maturation(error);
-
-			if(error)
-				return;
-		}
+			iter->maturation();
 	}
 	
 	//Now, let's evaluate the content
 	if(isFunction)
-	{
-		executeFunction(error);
-		
-		if(error)
-			return;
-	}
+		executeFunction();
+
 	else if(!isContainer)
 	{
 		polynome.push_back(_monome);
@@ -280,10 +271,8 @@ void Entity::maturation(bool & error)
 		Polynomial finalPoly = Polynomial(), currentPoly;
 		PolynomialFact finalFact = PolynomialFact(), currentFact;
 		Complex::complexN finalNumber = Complex::complexN(0, 0), currentNumber;
-		
-		if((currentPower = iter->power) == 0)
-			currentPower = 1;
-		
+
+		currentPower = iter->power;
 		currentType = iter->matureType;
 		
 		if(currentType & FARG_TYPE_NUMBER)
@@ -365,17 +354,8 @@ void Entity::maturation(bool & error)
 					
 				case OP_DIV:
 				{
-					try
-					{
-						divisionResult = CHOOSEVAR(matureType, finalPoly, finalFact, finalNumber) / CHOOSEVAR(currentType, currentPoly, currentFact, currentNumber);
-						currentType = FARG_TYPE_DIV_RESULT;
-					}
-					catch (const std::exception & e)
-					{
-						std::cerr << e.what();
-						error = true;
-						return;
-					}
+					divisionResult = CHOOSEVAR(matureType, finalPoly, finalFact, finalNumber) / CHOOSEVAR(currentType, currentPoly, currentFact, currentNumber);
+					matureType = FARG_TYPE_DIV_RESULT;
 					break;
 				}
 
@@ -418,9 +398,9 @@ void Entity::maturation(bool & error)
 					
 				default:
 				{
-					std::cerr << "Unexpected operand! (" << iter->previousOperator << ") Can't really dump the context, sorry :/";
-					error = true;
-					return;
+					std::stringstream error;
+					error << "Unexpected operand! (" << iter->previousOperator << ") Can't really dump the context, sorry :/";
+					throw std::invalid_argument(error.str());
 				}
 			}
 		}
@@ -459,7 +439,7 @@ void Entity::migrateType(uint8_t newType, Polynomial & finalPoly, PolynomialFact
 	newType = matureType;
 }
 
-bool Entity::checkArgumentConsistency(bool & error) const
+bool Entity::checkArgumentConsistency() const
 {
 	uint nbArg = Catalog::getNbArgsForID(functionCode), curType, pos = 0;
 	std::vector<uint> typing = Catalog::getArgumentType(functionCode);
@@ -470,8 +450,9 @@ bool Entity::checkArgumentConsistency(bool & error) const
 	{
 		if((iter->getType() & curType) == 0)
 		{
-			error = true;
-			std::cerr << "Invalid argument for function " << Catalog::getFunctionName(functionCode) << ", " << iter->getType() << " instead of " << curType << '\n';
+			std::stringstream error;
+			error << "Invalid argument for function " << Catalog::getFunctionName(functionCode) << ", " << iter->getType() << " instead of " << curType;
+			throw std::invalid_argument(error.str());
 			return false;
 		}
 		
@@ -483,8 +464,9 @@ bool Entity::checkArgumentConsistency(bool & error) const
 	{
 		if((iter->getType() & curType) == 0)
 		{
-			error = true;
-			std::cerr << "Invalid argument for function " << Catalog::getFunctionName(functionCode) << ", " << iter->getType() << " instead of " << curType << '\n';
+			std::stringstream error;
+			error << "Invalid argument for function " << Catalog::getFunctionName(functionCode) << ", " << iter->getType() << " instead of " << curType;
+			throw std::invalid_argument(error.str());
 			return false;
 		}
 		
@@ -494,9 +476,9 @@ bool Entity::checkArgumentConsistency(bool & error) const
 	return true;
 }
 
-void Entity::executeFunction(bool & error)
+void Entity::executeFunction()
 {
-	if(!checkArgumentConsistency(error))
+	if(!checkArgumentConsistency())
 		return;
 	
 	uint retType = Catalog::getFuncReturnType(functionCode), argPower = subLevel[0].power;

@@ -1,6 +1,6 @@
 #include "parserPrivate.h"
 
-Entity _parserCore(std::string input, int opType, bool & error)
+Entity _parserCore(std::string input, int opType)
 {
 	Entity output, auxiliary;
 	
@@ -19,84 +19,71 @@ Entity _parserCore(std::string input, int opType, bool & error)
 		{
 			if(!Catalog::variableName(input, receiver))
 			{
-				error = true;
-#ifdef VERBOSE
-				std::cerr << "No variable of name " << input << '\n';
-#endif
+				std::stringstream error;
+				error << "No variable of name " << input;
+				throw std::invalid_argument(error.str());
 				return output;
 			}
 		}
 		else
 		{
 			input.erase(0, 1);	//We remove the second =
-			auxiliary = _parseEntity(part1, true, error);
+			auxiliary = _parseEntity(part1, true);
 			
-			if(error)
-				return output;
-			
-			auxiliary.maturation(error);
-			
-			if(error)
-				return output;
+			auxiliary.maturation();
 		}
 	}
 	
-	output = _parseEntity(input, opType == TYPE_OP_CALCUL, error);
-	
-	if(!error)
-	{
-		output.maturation(error);
+	output = _parseEntity(input, opType == TYPE_OP_CALCUL);
+	output.maturation();
 		
-		if(!error)
-		{
-			if(opType == TYPE_OP_ALLOC)
-			{
-				VARIABLE content;
-				
-				content.type = output.matureType;
-				if(content.type & FARG_TYPE_NUMBER)
-					content.number = output.numberPure;
-				
-				else if(content.type & FARG_TYPE_FACTORISED)
-					content.polynomialFact = output.polynomeFact;
-				
-				else
-					content.polynomial = output.polynomePure;
-				
-				Catalog::setVariableValue(receiver, content);
-			}
-			else if(opType == TYPE_OP_COMPARE)
-			{
-				bool equal = false;
-				//We can compare auxiliary and output
-				if(auxiliary.matureType == output.matureType)
-				{
-					if(output.matureType & FARG_TYPE_NUMBER)
-						equal = output.numberPure == auxiliary.numberPure;
-
-					else if(output.matureType & FARG_TYPE_FACTORISED)
-						equal = output.polynomeFact == auxiliary.polynomeFact;
-					
-					else
-						equal = output.polynomePure == auxiliary.polynomePure;
-				}
-				
-				if(equal)
-					std::cout << "Those equations are equal\n";
-				
-				else
-					std::cout << "Those equations are not equal\n";
-			}
-			else if(opType == TYPE_OP_CALCUL)
-			{
-				output.print();
-			}
-		}
+	if(opType == TYPE_OP_ALLOC)
+	{
+		VARIABLE content;
+		
+		content.type = output.matureType;
+		if(content.type & FARG_TYPE_NUMBER)
+			content.number = output.numberPure;
+		
+		else if(content.type & FARG_TYPE_FACTORISED)
+			content.polynomialFact = output.polynomeFact;
+		
+		else
+			content.polynomial = output.polynomePure;
+		
+		Catalog::setVariableValue(receiver, content);
 	}
+	else if(opType == TYPE_OP_COMPARE)
+	{
+		bool equal = false;
+		//We can compare auxiliary and output
+		if(auxiliary.matureType == output.matureType)
+		{
+			if(output.matureType & FARG_TYPE_NUMBER)
+				equal = output.numberPure == auxiliary.numberPure;
+			
+			else if(output.matureType & FARG_TYPE_FACTORISED)
+				equal = output.polynomeFact == auxiliary.polynomeFact;
+			
+			else
+				equal = output.polynomePure == auxiliary.polynomePure;
+		}
+		
+		if(equal)
+			std::cout << "Those equations are equal\n";
+		
+		else
+			std::cout << "Those equations are not equal\n";
+	}
+	else if(opType == TYPE_OP_CALCUL)
+	{
+		output.print();
+	}
+	
 	return output;
 }
 
-Entity _parseEntity(std::string level, bool canDiv, bool & error)
+Entity _parseEntity(std::string level, bool canDiv)
 {
 	Entity output;
 	std::vector<uint> positions;
@@ -104,11 +91,10 @@ Entity _parseEntity(std::string level, bool canDiv, bool & error)
 	
 	if(havePlusOnLevel(level, positions) || haveMultOnLevel(level, positions))
 	{
-		std::vector<Entity> parsedLevel = _parseLevel(level, positions, canDiv, error);
-		if(!error)
-			output.setSublevel(parsedLevel);
+		std::vector<Entity> parsedLevel = _parseLevel(level, positions, canDiv);
+		output.setSublevel(parsedLevel);
 	}
-	else if(isFunction(level, functionCode, error))
+	else if(isFunction(level, functionCode))
 	{
 		//We extract the function argument, then evaluate the expression
 		
@@ -127,50 +113,36 @@ Entity _parseEntity(std::string level, bool canDiv, bool & error)
 			//(expected != 0 && nbArg != expected) || (expected == 0 && nbArg == expected)
 			if((nbArg != expected) ^ (expected == 0))
 			{
-				std::cerr << "Invalid number of argument for function " << Catalog::getFunctionName(functionCode) << " (" << nbArg << " instead of " << Catalog::getNbArgsForID(functionCode) << "), context, " << level << '\n';
-				error = true;
+				std::stringstream error;
+				error << "Invalid number of argument for function " << Catalog::getFunctionName(functionCode) << " (" << nbArg << " instead of " << Catalog::getNbArgsForID(functionCode) << "), context, " << level;
+				throw std::invalid_argument(error.str());
 			}
 			else if(nbArg == 1)
-				output = _parseEntity(argument, false, error);
+				output = _parseEntity(argument, false);
 			else
 			{
-				std::vector<Entity> subLevel = _parseLevel(argument, positions, false, error);
-				if(!error)
-					output.setSublevel(subLevel);
+				std::vector<Entity> subLevel = _parseLevel(argument, positions, false);
+				output.setSublevel(subLevel);
 			}
 
-			if(!error)
-				output.setFunction(functionCode);
+			output.setFunction(functionCode);
 		}
 		else
 		{
-			error = true;
-#ifdef VERBOSE
-			std::cerr << "No valid argument for function " << Catalog::getFunctionName(functionCode) <<  "\nContext: " << level << '\n';
-#endif
+			std::stringstream error;
+			error << "No valid argument for function " << Catalog::getFunctionName(functionCode) <<  "\nContext: " << level;
+			throw std::invalid_argument(error.str());
 		}
 	}
-	else if(!error)
-	{
-		output = parseMonome(level, error);
-	}
-	
+	else
+		output = parseMonome(level);
+
 	return output;
 }
 
-std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, bool canDiv, bool & error)
+std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, bool canDiv)
 {
 	std::vector<Entity> output;
-	
-	//Shouldn't happen (as error would have been triggered)
-	if(positions.size() == 0)
-	{
-		error = true;
-#ifdef VERBOSE
-		std::cerr << "No positions in array\n";
-#endif
-		return output;
-	}
 	
 	Entity entity;
 	uint basePos = 0;
@@ -185,16 +157,13 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 		//We're trying to add something after divising, that is not allowed
 		if(doesDiv)
 		{
-			error = true;
-#ifdef VERBOSE
-			std::cerr << "Invalid division, because of the specifications, it can only be used when directly outputed"<< '\n';
-#endif
+			std::stringstream error;
+			error << "Invalid division, because of the specifications, it can only be used when directly outputed";
+			throw std::invalid_argument(error.str());
 			break;
 		}
 		
-		entity = _parseEntity(level.substr(basePos, *current - basePos), false, error);
-		if(error)
-			break;
+		entity = _parseEntity(level.substr(basePos, *current - basePos), false);
 
 		if(basePos <= 1)
 			entity.previousOperator = OP_NONE;
@@ -212,10 +181,9 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 				}
 				else	//We don't support weird powers...
 				{
-					error = true;
-#ifdef VERBOSE
-					std::cerr << "Invalid power: " << level.substr(basePos, *current) << " ~ " << *current << '\n';
-#endif
+					std::stringstream error;
+					error << "Invalid power: " << level.substr(basePos, *current) << " ~ " << *current;
+					throw std::invalid_argument(error.str());
 					break;
 				}
 			}
@@ -229,10 +197,9 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 				}
 				else
 				{
-					error = true;
-#ifdef VERBOSE
-					std::cerr << "Invalid division, because of the specifications, it can only be used when directly outputed"<< '\n';
-#endif
+					std::stringstream error;
+					error << "Invalid division, because of the specifications, it can only be used when directly outputed";
+					throw std::invalid_argument(error.str());
 					break;
 				}
 			}

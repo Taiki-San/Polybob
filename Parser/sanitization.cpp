@@ -1,7 +1,7 @@
 #include "parserPrivate.h"
 
 //Perform basic consistency checks, ensure parenthesis and brackets are properly set, and that there is no illegal operator combinaison
-bool checkString(std::string input)
+void checkString(std::string input)
 {
 	std::string::const_iterator iterator = input.begin();
 	std::vector<int> parenthesisCountInBracket;
@@ -161,23 +161,25 @@ bool checkString(std::string input)
 
 	if(inconsistency)
 	{
+		std::stringstream error;
+
 		if(parenthesisCount < 0)
-			std::cerr << "Invalid parenthesis () combinaison\n";
+			error << "Invalid parenthesis () combinaison";
 		else if(bracketCount < 0 || bracketCount > 1)
-			std::cerr << "Invalid bracket [] combinaison\n";
+			error << "Invalid bracket [] combinaison";
 		else if(inBraces)
-			std::cerr << "Invalid brace {} combinaison\n";
+			error << "Invalid brace {} combinaison";
 		else if(last == '=')
-			std::cerr << "Invalid use of equality, only 1 equal per equation, or two together to perform comparaison";
+			error << "Invalid use of equality, only 1 equal per equation, or two together to perform comparaison";
 		else
-			std::cerr << "Invalid operand combinaison: " << last << " before " << *--iterator << '\n';
+			error << "Invalid operand combinaison: " << last << " before " << *--iterator;
+
+		throw std::invalid_argument(error.str());
 	}
 	else if(last != 0 && last != '}' && last != ']' && last != ')')	//Obvious invalid end
 	{
-		std::cerr << "Invalid end of the request\n";
+		throw std::invalid_argument("Invalid end of the request");
 	}
-
-	return !inconsistency;
 }
 
 int syntaxAnalysis(std::string input)
@@ -197,8 +199,7 @@ int syntaxAnalysis(std::string input)
 				return TYPE_OP_ALLOC;
 		}
 		
-		std::cerr << "Invalid request";
-		return TYPE_OP_INVALID;
+		throw std::invalid_argument("Invalid request");
 	}
 	
 	return TYPE_OP_CALCUL;
