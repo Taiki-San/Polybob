@@ -97,6 +97,7 @@ public:
 	bool setFunction(uint functionCode);
 	
 	void updatePowerOfLast(int power);
+	void resetToOne();
 	
 	//Getter
 	uint getType() const;
@@ -116,12 +117,6 @@ public:
 };
 
 #pragma mark - Catalog
-
-struct variableMetadata
-{
-	uint8_t type;
-	uint index;
-};
 
 typedef struct variableContainer
 {

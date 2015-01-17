@@ -46,7 +46,11 @@ void Entity::updatePowerOfLast(int _power)
 	if(isContainer && !isFunction)
 	{
 		Entity & end = subLevel.back();
-		end.power += _power;
+		
+		if(end.power + _power == 0)
+			end.resetToOne();
+		else
+			end.power += _power;
 	}
 	else
 		power += _power;
@@ -74,6 +78,13 @@ bool Entity::isFactorisedPoly() const
 	}
 	
 	return false;
+}
+
+void Entity::resetToOne()
+{
+	isMature = false;
+	power = 1;
+	_monome = monome(Complex::complexN(1, 0), 0);
 }
 
 #pragma mark - Getter
@@ -125,24 +136,24 @@ void Entity::print() const
 void Entity::print(uint depth) const
 {
 	if(isFunction)
-		std::cout << std::string(depth++, SEPARATOR) << Catalog::getFunctionName(functionCode) << "[\n";
+		std::cout << std::string(depth++, SEPARATOR) << Catalog::getFunctionName(functionCode) << "[";
 	
 	if(isContainer)
 	{
-		std::cout << std::string(depth, SEPARATOR) << "{\n";
+		std::cout << std::string(depth, SEPARATOR) << "(";
 
 		for (std::vector<Entity>::const_iterator i = subLevel.begin(); i != subLevel.end(); ++i)
 		{
 			i->print(depth + 1);
 			
 			if(isFunction)
-				std::cout << std::string(depth, SEPARATOR) << ",\n";
+				std::cout << std::string(depth, SEPARATOR) << ", ";
 		}
 
 		if(power != SPIRIT_DEFAULT_POWER_VALUE)
-			std::cout << std::string(depth, SEPARATOR) << "}^" << power << '\n';
+			std::cout << std::string(depth, SEPARATOR) << ")^" << power << ' ';
 		else
-			std::cout << std::string(depth, SEPARATOR) << "}\n";
+			std::cout << std::string(depth, SEPARATOR) << ")";
 	}
 	else
 	{
@@ -154,24 +165,23 @@ void Entity::print(uint depth) const
 		printMonome();
 		
 		if(power != SPIRIT_DEFAULT_POWER_VALUE)
-			std::cout << ")^" << power << '\n';
+			std::cout << ")^" << power << ' ';
 	}
 	
 	if(isFunction)
 	{
 		if(power != SPIRIT_DEFAULT_POWER_VALUE)
-			std::cout << std::string(--depth, SEPARATOR) << "]^" << power << '\n';
+			std::cout << std::string(--depth, SEPARATOR) << "]^" << power << ' ';
 		else
-			std::cout << std::string(--depth, SEPARATOR) << "]\n";
+			std::cout << std::string(--depth, SEPARATOR) << "]";
 	}
 }
 
 void Entity::printMonome() const
 {
-	std::cout << "coefficient: ";
 	if(_monome.coeff.real() == 0 && _monome.coeff.imag() == 0)
 	{
-		std::cout << "0\n";
+		std::cout << '0';
 		return;
 	}
 	
@@ -185,11 +195,11 @@ void Entity::printMonome() const
 		std::cout << '(' << _monome.coeff.real() << '+' << _monome.coeff.imag() << "i)";
 	
 	if(_monome.power > 1)
-		std::cout << "x^" << _monome.power << '\n';
+		std::cout << "x^" << _monome.power << ' ';
 	else if(_monome.power == 1)
-		std::cout << "x\n";
+		std::cout << "x";
 	else
-		std::cout << '\n';
+		std::cout << ' ';
 }
 
 #pragma mark - Maturation
@@ -275,22 +285,25 @@ void Entity::maturation()
 		currentPower = iter->power;
 		currentType = iter->matureType;
 		
-		if(currentType & FARG_TYPE_NUMBER)
+		if(currentPower > 1)
 		{
-			finalNumber = std::pow(iter->numberPure, currentPower);
-		}
-		
-		else if(currentType & FARG_TYPE_FACTORISED)
-		{
-			fullyFactorised = true;
-
-			//Factorized form already consider the power
-			finalFact = iter->polynomeFact;
-		}
-		
-		else
-		{
-			finalPoly = iter->polynomePure ^ currentPower;
+			if(currentType & FARG_TYPE_NUMBER)
+			{
+				finalNumber = std::pow(iter->numberPure, currentPower);
+			}
+			
+			else if(currentType & FARG_TYPE_FACTORISED)
+			{
+				fullyFactorised = true;
+				
+				//Factorized form already consider the power
+				finalFact = iter->polynomeFact;
+			}
+			
+			else
+			{
+				finalPoly = iter->polynomePure ^ currentPower;
+			}
 		}
 		
 		for(++iter; iter != subLevel.end() && currentType != FARG_TYPE_DIV_RESULT; ++iter)

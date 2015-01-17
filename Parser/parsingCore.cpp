@@ -20,7 +20,7 @@ Entity _parserCore(std::string input, int opType)
 			if(!Catalog::variableName(input, receiver))
 			{
 				std::stringstream error;
-				error << "No variable of name " << input;
+				error << "Not a valid variable name: " << input;
 				throw std::invalid_argument(error.str());
 				return output;
 			}
@@ -175,7 +175,6 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 				Entity & previous = output.back();
 				if(entity.isReal())
 				{
-					
 					previous.updatePowerOfLast(int(entity._monome.coeff.real()));
 					dropEntity = true;
 				}
