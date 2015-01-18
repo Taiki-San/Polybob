@@ -103,6 +103,7 @@ Entity _parseEntity(std::string level)
 			size_t nbArg, expected = Catalog::getNbArgsForID(functionCode);
 			std::vector<uint> positions;
 			std::string argument = level.substr(start, length);
+			std::vector<Entity> subLevel;
 			
 			separateFunctionArgs(argument, positions);
 			nbArg = positions.size();
@@ -117,13 +118,17 @@ Entity _parseEntity(std::string level)
 				throw std::invalid_argument(error.str());
 			}
 			else if(nbArg == 1)
-				output = _parseEntity(argument);
+			{
+				Entity subElem = _parseEntity(argument);
+				subElem.functionArg = true;
+				subLevel.push_back(subElem);
+			}
 			else
 			{
-				std::vector<Entity> subLevel = _parseLevel(argument, positions);
-				output.setSublevel(subLevel);
+				subLevel = _parseLevel(argument, positions);
 			}
-
+			
+			output.setSublevel(subLevel);
 			output.setFunction(functionCode);
 		}
 		else
@@ -145,7 +150,7 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions)
 	
 	Entity entity;
 	uint basePos = 0;
-	bool dropEntity = false, doesDiv = false;
+	bool dropEntity = false, doesDiv = false, foundOne = false;
 	
 	//Positions contain the index of operators
 	for(std::vector<uint>::const_iterator current = positions.begin(); current != positions.end(); ++current)
@@ -161,8 +166,11 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions)
 		
 		entity = _parseEntity(level.substr(basePos, *current - basePos));
 
-		if(basePos == 0)
+		if(!foundOne)
+		{
+			foundOne = true;
 			entity.previousOperator = OP_NONE;
+		}
 		else
 		{
 			entity.previousOperator = getPreviousOP(level[basePos-1]);
@@ -181,6 +189,18 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions)
 					throw std::invalid_argument(error.str());
 					break;
 				}
+			}
+			else if(entity.previousOperator == OP_MULT)
+			{
+				Entity & previous = output.back();
+				if(previous._monome.coeff == Complex::complexN(1, 0) && previous._monome.power == 0)
+				{
+					entity.previousOperator = previous.previousOperator;
+					previous = entity;
+					dropEntity = true;
+				}
+				else if(entity._monome.coeff == Complex::complexN(1, 0) && entity._monome.power == 0)
+					dropEntity = true;
 			}
 		}
 		

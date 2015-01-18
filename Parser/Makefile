@@ -1,6 +1,6 @@
-CC = clang++
+CC = g++
 
-BASE_FLAGS  =  -Wall -g
+BASE_FLAGS  =  -Wall -std=gnu++11
 
 # INCLUDE BASE DIRECTORY AND BOOST DIRECTORY FOR HEADERS
 LDFLAGS = -I/usr/local/Cellar/boost/1.57.0/include
@@ -14,17 +14,12 @@ LINKFLAG = $(LLIBFLAGS) $(LINKFLAGS)
 
 all: clever
 
-spirit:
-	$(CC) $(FLAGS) -c -o main.o base.cpp
-	$(CC) $(FLAGS) -c -o spirit.o spirit.cpp
-	$(CC) $(FLAGS) -c -o logic.o sanitization.cpp
-	$(CC) $(FLAGS) -c -o toolbox.o toolbox.cpp
-	$(CC) $(FLAGS) -c -o parsingCore.o parsingCore.cpp
-	$(CC) $(LINKFLAG) -o main.out main.o logic.o toolbox.o spirit.o parsingCore.o
-
 clever:
-	$(CC) $(FLAGS) -c -o main.o base.cpp
-	$(CC) $(FLAGS) -c -o logic.o sanitization.cpp
-	$(CC) $(FLAGS) -c -o toolbox.o toolbox.cpp
-	$(CC) $(FLAGS) -c -o parsingCore.o parsingCore.cpp
-	$(CC) $(LINKFLAG) -o main.out main.o logic.o toolbox.o spirit.o parsingCore.o
+	$(CC) $(FLAGS) -c -o ../obj/catalogue.o catalogue.cpp
+	$(CC) $(FLAGS) -c -o ../obj/entity.o entity.cpp
+	$(CC) $(FLAGS) -c -o ../obj/interface.o interface.cpp
+	$(CC) $(FLAGS) -c -o ../obj/parsingCore.o parsingCore.cpp
+	$(CC) $(FLAGS) -c -o ../obj/sanitization.o sanitization.cpp
+	$(CC) $(FLAGS) -c -o ../obj/spirit.o spirit.cpp
+	$(CC) $(FLAGS) -c -o ../obj/thread.o thread.c
+	$(CC) $(FLAGS) -c -o ../obj/toolbox.o toolbox.cpp

@@ -4,6 +4,7 @@ Entity::Entity() : _monome(Complex::complexN(0, 0), 0)
 {
 	isMature = false;
 	initialized = false;
+	functionArg = false;
 	isContainer = isFunction = false;
 	previousOperator = OP_NONE;
 	power = 1;
@@ -207,11 +208,26 @@ void Entity::maturation(char threadID)
 		{
 			size_t length = subLevel.size(), count = 0;
 			unsigned char argument[3] = {1, 2, 3};
+			bool worthIt = false;
+			
+			for(std::vector<Entity>::iterator iter = subLevel.begin(); iter != subLevel.end(); ++iter)
+			{
+				if(iter->isContainer)
+				{
+					count++;
+					if(count > 2)
+					{
+						worthIt = true;
+						break;
+					}
+				}
+			}
+
 			
 			//If only one element, we check lower
-			if(length == 1)
+			if(!worthIt)
 			{
-				return this->maturation(0);
+				return this->maturation(-1);
 			}
 			
 			_mainEntity = this;
@@ -256,7 +272,7 @@ void Entity::maturation(char threadID)
 					break;
 				MUTEX_UNLOCK;
 				
-				usleep(50000);
+				usleep(100);
 			}
 			MUTEX_UNLOCK;
 
@@ -304,6 +320,9 @@ void Entity::maturation(char threadID)
 	//Now, let's evaluate the content
 	if(isFunction)
 		executeFunction();
+	
+	else if(functionArg)
+		return;
 
 	else if(!isContainer)
 	{
@@ -321,6 +340,7 @@ void Entity::maturation(char threadID)
 			vector.push_back(element);
 			
 			polynomeFact = PolyFact(vector, _monome.coeff);
+			polyfactOfDegree0 = _monome.coeff.real() == 1 && _monome.coeff.imag() == 0 && power == 1;
 			power = 1;
 		}
 		else
@@ -356,7 +376,7 @@ void Entity::maturation(char threadID)
 		
 		std::vector<Entity>::const_iterator iter = subLevel.begin();
 		
-		bool fullyFactorised = false;
+		bool fullyFactorised = false, couldBePolyOfDeg1 = false;
 		uint8_t currentType;
 		uint currentPower;
 		
@@ -379,6 +399,7 @@ void Entity::maturation(char threadID)
 			else if(currentType & FARG_TYPE_FACTORISED)
 			{
 				fullyFactorised = true;
+				couldBePolyOfDeg1 = iter->polyfactOfDegree0;
 				
 				//Factorized form already consider the power
 				finalFact = iter->polynomeFact;
@@ -451,6 +472,25 @@ void Entity::maturation(char threadID)
 							finalNumber -= currentNumber;
 						else
 							finalNumber += currentNumber;
+					}
+					else if((matureType & FARG_TYPE_FACTORISED && couldBePolyOfDeg1 && currentType & FARG_TYPE_NUMBER) || (matureType & FARG_TYPE_NUMBER && currentType & FARG_TYPE_FACTORISED && iter->polyfactOfDegree0))
+					{
+						Complex::complexN number;
+
+						if(matureType & FARG_TYPE_FACTORISED)
+						{
+							number = currentNumber;
+							if(iter->previousOperator == OP_PLUS)
+								number *= -1;
+						}
+						else
+							number = finalNumber;
+						
+
+						vectorFactors_t vector;
+						vector.push_back(Factor(number, 1));
+						finalFact = PolyFact(vector, 1);
+						matureType = FARG_TYPE_FACTORISED;
 					}
 					else
 					{
@@ -553,6 +593,8 @@ void Entity::maturation(char threadID)
 		
 		else
 			polynomePure = finalPoly;
+		
+		polyfactOfDegree0 = false;
 	}
 	
 	isMature = true;
@@ -593,7 +635,7 @@ bool Entity::checkArgumentConsistency() const
 	//We set curType earlier so in the case where nbArg == 0 (wildcard), we already have curType
 	for(curType = typing[0]; pos < nbArg && iter != subLevel.end(); ++iter)
 	{
-		if((iter->getType() & curType) == 0)
+		if((iter->matureType & curType) == 0)
 		{
 			std::stringstream error;
 			error << "Invalid argument for function " << Catalog::getFunctionName(functionCode) << ", " << iter->getType() << " instead of " << curType;

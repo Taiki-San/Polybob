@@ -8,6 +8,7 @@ all:
 	rm -rf obj/*
 	$(MAKE) -C CLI
 	$(MAKE) -C Parser
+	$(MAKE) -C Maths
 
 	$(CC) $(BASE_FLAGS) -c entrypoint.c -o obj/entrypoint.o
 

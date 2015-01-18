@@ -80,16 +80,16 @@ class Entity
 	bool isFunction;
 
 	uint functionCode;
-	
+
 	void migrateType(uint8_t newType, Polynomial & finalPoly, PolyFact & finalFact, Complex::complexN & finalNumber);
 	bool checkArgumentConsistency() const;
-	
+
 public:
-	
+
 	//Public content
 	monome _monome;
 	std::vector<monome> polynome;
-	
+
 	//Mature
 	uint8_t matureType;
 	Polynomial polynomePure;
@@ -102,15 +102,18 @@ public:
 	int power;
 	bool initialized;
 
+	bool polyfactOfDegree0;
+	bool functionArg;
+
 	//Setters
 	Entity();
 	bool setMonome(monome entry);
 	bool setSublevel(std::vector<Entity> entry);
 	bool setFunction(uint functionCode);
-	
+
 	void updatePowerOfLast(int power);
 	void resetToOne();
-	
+
 	//Getter
 	uint getType() const;
 	bool isReal() const;
@@ -120,7 +123,7 @@ public:
 	//IO
 	void print()		const;
 	void printMonome()	const;
-	
+
 	//Maturation
 	void maturation(char threadID);
 	void executeFunction();
@@ -134,7 +137,7 @@ typedef struct variableContainer
 	Polynomial polynomial;
 	PolyFact PolyFact;
 	Complex::complexN number;
-	
+
 	uint8_t type;
 } VARIABLE;
 
@@ -142,16 +145,16 @@ class Catalog
 {
 	std::string cacheRaw, cacheName;
 	bool haveCache;
-	
+
 	std::vector<uint> functionCodes;
 	std::vector<std::string> functionNames;
 	std::vector<uint> functionArgumentNumber;
-	std::vector<std::vector<uint>> functionArgumentType;
+	std::vector<std::vector<uint> > functionArgumentType;
 	std::vector<uint> functionReturnType;
-	
+
 	std::vector<std::string> variableNames;
 	std::vector<VARIABLE> variableContent;
-	
+
 	Catalog();
 	Catalog(Catalog const&);
 
@@ -159,24 +162,24 @@ class Catalog
 
 public:
 	static Catalog& Instance();
-	
+
 	static uint getIDOfFunction(std::string name);
 	static uint getNbArgsForID(uint ID);
 	static std::string getFunctionName(uint ID);
 	static std::vector<uint> getArgumentType(uint ID);
 	static uint getFuncReturnType(uint ID);
-	
+
 	//Variable tools
 	static bool variableName(std::string input, std::string & variableName);
 	static bool isVariable(std::string input);
-	
+
 	//Auto-completion
 	static bool haveVariableSuggestion(std::string begining, std::string & suggestion);
-	
+
 	//Variable manipulation
 	static VARIABLE variableValue(std::string variableName);
 	static void setVariableValue(std::string variableName, VARIABLE content);
-	
+
 	static void registerCache(std::string rawInput, std::string variableName);
 	static bool getCache(std::string & raw, std::string & name);
 };
