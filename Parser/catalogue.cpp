@@ -208,6 +208,7 @@ void Catalog::setVariableValue(std::string variableName, VARIABLE content)
 		if(*iter == variableName)
 		{
 			instance.variableContent[index] = content;
+			return;
 		}
 	}
 	

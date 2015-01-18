@@ -122,7 +122,10 @@ Entity parseMonome(std::string str)
 			if(!(second.type & FARG_TYPE_NUMBER) || (second.number != Complex::complexN(1, 0)))
 				sublevel.push_back(_parseSubElement(second, firstCatch ? OP_NONE : OP_MULT));
 
-			output.setSublevel(sublevel);
+			if(sublevel.size() == 1)
+				output = sublevel[0];
+			else
+				output.setSublevel(sublevel);
 		}
 		return output;
 	}

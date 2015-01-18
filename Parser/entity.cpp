@@ -5,7 +5,7 @@ Entity::Entity() : _monome(Complex::complexN(0, 0), 0)
 	isMature = false;
 	initialized = false;
 	functionArg = false;
-	isContainer = isFunction = false;
+	polyfactOfDegree0 = isContainer = isFunction = false;
 	previousOperator = OP_NONE;
 	power = 1;
 }
@@ -195,7 +195,7 @@ void maturationWrapper(unsigned * currentThread)
 	_mainEntity->maturation(*currentThread);
 }
 
-void Entity::maturation(char threadID)
+void Entity::maturation(short threadID)
 {
 	if(isMature)
 		return;
@@ -626,19 +626,27 @@ void Entity::migrateType(uint8_t newType, Polynomial & finalPoly, PolyFact & fin
 	matureType = newType;
 }
 
-bool Entity::checkArgumentConsistency() const
+bool Entity::checkArgumentConsistency()
 {
 	uint nbArg = Catalog::getNbArgsForID(functionCode), curType, pos = 0;
 	std::vector<uint> typing = Catalog::getArgumentType(functionCode);
-	std::vector<Entity>::const_iterator iter = subLevel.begin();
+	std::vector<Entity>::iterator iter = subLevel.begin();
 	
 	//We set curType earlier so in the case where nbArg == 0 (wildcard), we already have curType
 	for(curType = typing[0]; pos < nbArg && iter != subLevel.end(); ++iter)
 	{
+		//Variables would create a sublevel
+		if(iter->isContainer && iter->subLevel.size() == 1)
+		{
+			uint power = iter->power;
+			*iter = iter->subLevel[0];
+			iter->power += power - 1;
+		}
+		
 		if((iter->matureType & curType) == 0)
 		{
 			std::stringstream error;
-			error << "Invalid argument for function " << Catalog::getFunctionName(functionCode) << ", " << iter->getType() << " instead of " << curType;
+			error << "Invalid argument for function " << Catalog::getFunctionName(functionCode) << ", " << int(iter->matureType) << " instead of " << curType;
 			throw std::invalid_argument(error.str());
 			return false;
 		}

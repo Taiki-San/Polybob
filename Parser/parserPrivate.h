@@ -82,7 +82,7 @@ class Entity
 	uint functionCode;
 
 	void migrateType(uint8_t newType, Polynomial & finalPoly, PolyFact & finalFact, Complex::complexN & finalNumber);
-	bool checkArgumentConsistency() const;
+	bool checkArgumentConsistency();
 
 public:
 
@@ -125,7 +125,7 @@ public:
 	void printMonome()	const;
 
 	//Maturation
-	void maturation(char threadID);
+	void maturation(short threadID);
 	void executeFunction();
 	bool isMature;
 };

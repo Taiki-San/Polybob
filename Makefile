@@ -12,7 +12,7 @@ all:
 
 	$(CC) $(BASE_FLAGS) -c entrypoint.c -o obj/entrypoint.o
 
-	$(CC) $(LINK_FLAGS) obj/* -o polybob.out
+	$(CC) $(LINK_FLAGS) obj/* -o PolyBob
 
 clean:
 	rm -rf obj/*

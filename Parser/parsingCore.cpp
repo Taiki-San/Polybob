@@ -42,9 +42,12 @@ Entity _parserCore(std::string input, int opType)
 		VARIABLE content;
 		
 		content.type = output.matureType;
-		content.number = output.numberPure;
-		content.polynomial = output.polynomePure;
-		content.PolyFact = output.polynomeFact;
+		if(content.type & FARG_TYPE_NUMBER)
+			content.number = output.numberPure;
+		else if(content.type & FARG_TYPE_FACTORISED)
+			content.PolyFact = output.polynomeFact;
+		else
+			content.polynomial = output.polynomePure;
 		
 		Catalog::setVariableValue(receiver, content);
 
