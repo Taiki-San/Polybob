@@ -3,6 +3,7 @@
 	#define PARSER_HEADER
 
 	void simpleParserAPI(char * cString);
+	void finalProcessing();
 
 	//Auto-completion
 

@@ -10,6 +10,15 @@
 #define VERBOSE
 #define SPIRIT_DEFAULT_POWER_VALUE 0
 
+#pragma mark - Multithreading
+
+extern pthread_mutex_t mutex;
+#define MUTEX_LOCK pthread_mutex_lock(&mutex)
+#define MUTEX_UNLOCK pthread_mutex_unlock(&mutex)
+#define MUTEX_DESTROY pthread_mutex_destroy(&mutex)
+
+void createNewThread(void *function, void *arg);
+
 #pragma mark Enums
 
 enum

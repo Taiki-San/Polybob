@@ -9,6 +9,11 @@ Entity parserCore(std::string input)
 	return _parserCore(input, syntaxAnalysis(input));
 }
 
+void finalProcessing()
+{
+	MUTEX_DESTROY;
+}
+
 #pragma mark - API
 
 void simpleParserAPI(char * cString)

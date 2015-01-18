@@ -51,5 +51,7 @@ int main(int argc, char **argv)
 		free(line);
 		snprintf(promptMsg, 100, "[%d]: ", ++promptNb);
 	}
+	
+	finalProcessing();
 	return 0;
 }
