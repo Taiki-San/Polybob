@@ -17,7 +17,7 @@ Entity _parserCore(std::string input, int opType)
 		
 		if(opType == TYPE_OP_ALLOC)
 		{
-			if(!Catalog::variableName(input, receiver))
+			if(!Catalog::variableName(part1, receiver))
 			{
 				std::stringstream error;
 				error << "Not a valid variable name: " << input;
@@ -42,14 +42,9 @@ Entity _parserCore(std::string input, int opType)
 		VARIABLE content;
 		
 		content.type = output.matureType;
-		if(content.type & FARG_TYPE_NUMBER)
-			content.number = output.numberPure;
-		
-		else if(content.type & FARG_TYPE_FACTORISED)
-			content.PolyFact = output.polynomeFact;
-		
-		else
-			content.polynomial = output.polynomePure;
+		content.number = output.numberPure;
+		content.polynomial = output.polynomePure;
+		content.PolyFact = output.polynomeFact;
 		
 		Catalog::setVariableValue(receiver, content);
 	}
@@ -66,7 +61,10 @@ Entity _parserCore(std::string input, int opType)
 				equal = output.polynomeFact == auxiliary.polynomeFact;
 			
 			else
+			{
+				std::cout << output.polynomePure.toString() << " ~ " << auxiliary.polynomePure.toString() << '\n';
 				equal = output.polynomePure == auxiliary.polynomePure;
+			}
 		}
 		
 		if(equal)

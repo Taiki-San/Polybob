@@ -261,7 +261,7 @@ bool isFunction(std::string level, uint & functionCode)
 void separateFunctionArgs(std::string level, std::vector<uint> & positions)
 {
 	bool inBlock = false;
-	char exitChar = 0, currentChar, previousChar = 0;
+	char exitChar = 0, currentChar;
 	uint index = 0;
 	
 	for(std::string::const_iterator currentCharIt = level.begin(); currentCharIt != level.end(); ++currentCharIt, index++)
@@ -284,8 +284,6 @@ void separateFunctionArgs(std::string level, std::vector<uint> & positions)
 
 		else if(currentChar == '{')
 			exitChar = '}';
-		
-		previousChar = currentChar;
 	}
 	
 	positions.push_back((uint)level.length());

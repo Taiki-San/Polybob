@@ -1,9 +1,8 @@
 #include "parserPrivate.h"
 
-#define SEPARATOR '	'
-
 Entity::Entity() : _monome(Complex::complexN(0, 0), 0)
 {
+	isMature = false;
 	initialized = false;
 	isContainer = isFunction = false;
 	previousOperator = OP_NONE;
@@ -50,10 +49,10 @@ void Entity::updatePowerOfLast(int _power)
 		if(end.power + _power == 0)
 			end.resetToOne();
 		else
-			end.power += _power;
+			end.power = _power;
 	}
 	else
-		power += _power;
+		power = _power;
 }
 
 bool Entity::isReal() const
@@ -105,7 +104,9 @@ uint Entity::getType() const
 				
 				return FARG_TYPE_NUMBER;
 			}
-			else	//x^4
+			else if(polynome[0].power == 1)
+				return FARG_TYPE_FACTORISED;
+			else
 				return FARG_TYPE_POLY_NOFACT;
 		}
 		
@@ -130,76 +131,46 @@ uint Entity::getType() const
 
 void Entity::print() const
 {
-	print(0);
-}
-
-void Entity::print(uint depth) const
-{
-	if(isFunction)
-		std::cout << std::string(depth++, SEPARATOR) << Catalog::getFunctionName(functionCode) << "[";
-	
-	if(isContainer)
+	if(matureType & FARG_TYPE_DIV_RESULT)
 	{
-		std::cout << std::string(depth, SEPARATOR) << "(";
-
-		for (std::vector<Entity>::const_iterator i = subLevel.begin(); i != subLevel.end(); ++i)
-		{
-			i->print(depth + 1);
-			
-			if(isFunction)
-				std::cout << std::string(depth, SEPARATOR) << ", ";
-		}
-
-		if(power != SPIRIT_DEFAULT_POWER_VALUE)
-			std::cout << std::string(depth, SEPARATOR) << ")^" << power << ' ';
-		else
-			std::cout << std::string(depth, SEPARATOR) << ")";
+		std::cout << "Quotient: 	" << divisionResult.first.toString() << '\n';
+		std::cout << "Remaining:	" << divisionResult.second.toString() << '\n';
 	}
 	else
 	{
-		if(power != SPIRIT_DEFAULT_POWER_VALUE)
-			std::cout << std::string(depth, SEPARATOR) << '(';
+		if(power  > 1)
+			std::cout << '(';
+		
+		if(matureType & FARG_TYPE_NUMBER)
+			printMonome();
+		else if(matureType & FARG_TYPE_FACTORISED)
+			std::cout << polynomeFact.toString();
 		else
-			std::cout << std::string(depth, SEPARATOR);
+			std::cout << polynomePure.toString();
 		
-		printMonome();
-		
-		if(power != SPIRIT_DEFAULT_POWER_VALUE)
+		if(power  > 1)
 			std::cout << ")^" << power << ' ';
-	}
-	
-	if(isFunction)
-	{
-		if(power != SPIRIT_DEFAULT_POWER_VALUE)
-			std::cout << std::string(--depth, SEPARATOR) << "]^" << power << ' ';
-		else
-			std::cout << std::string(--depth, SEPARATOR) << "]";
 	}
 }
 
 void Entity::printMonome() const
 {
-	if(_monome.coeff.real() == 0 && _monome.coeff.imag() == 0)
+	if(numberPure.real() == 0 && numberPure.imag() == 0)
 	{
 		std::cout << '0';
 		return;
 	}
 	
-	else if(_monome.coeff.imag() == 0)
-		std::cout << _monome.coeff.real();
+	else if(numberPure.imag() == 0)
+		std::cout << numberPure.real();
 	
-	else if(_monome.coeff.real() == 0)
-		std::cout << _monome.coeff.imag() << 'i';
+	else if(numberPure.real() == 0)
+		std::cout << numberPure.imag() << 'i';
 	
 	else
-		std::cout << '(' << _monome.coeff.real() << '+' << _monome.coeff.imag() << "i)";
+		std::cout << '(' << numberPure.real() << '+' << numberPure.imag() << "i)";
 	
-	if(_monome.power > 1)
-		std::cout << "x^" << _monome.power << ' ';
-	else if(_monome.power == 1)
-		std::cout << "x";
-	else
-		std::cout << ' ';
+	std::cout << ' ';
 }
 
 #pragma mark - Maturation
@@ -208,6 +179,9 @@ void Entity::printMonome() const
 
 void Entity::maturation()
 {
+	if(isMature)
+		return;
+	
 	//We mature the sub-elems
 	if(isContainer)
 	{
@@ -281,9 +255,9 @@ void Entity::maturation()
 		Complex::complexN finalNumber = Complex::complexN(0, 0), currentNumber;
 
 		currentPower = iter->power;
-		currentType = iter->matureType;
+		matureType = currentType = iter->matureType;
 		
-		if(currentPower > 1)
+		if(currentPower > 0)
 		{
 			if(currentType & FARG_TYPE_NUMBER)
 			{
@@ -310,6 +284,8 @@ void Entity::maturation()
 				finalPoly = iter->polynomePure ^ currentPower;
 			}
 		}
+		else
+			finalNumber += 1;
 		
 		for(++iter; iter != subLevel.end() && currentType != FARG_TYPE_DIV_RESULT; ++iter)
 		{
@@ -368,13 +344,13 @@ void Entity::maturation()
 					{
 						//Hum, we need to move our value in the appropriate variable, as type is about to change
 						if((matureType & FARG_TYPE_NUMBER) || (matureType & FARG_TYPE_FACTORISED))
-							migrateType(FARG_TYPE_POLY, finalPoly, finalFact, finalNumber);
+							migrateType(FARG_TYPE_POLY_NOFACT, finalPoly, finalFact, finalNumber);
 
 						if(iter->previousOperator == OP_MINUS)
 						{
 							if(currentType & FARG_TYPE_NUMBER)
 								finalPoly -= currentNumber;
-							else if(currentType & FARG_TYPE_POLY_NOFACT)
+							else if(currentType & FARG_TYPE_FACTORISED)
 								finalPoly -= currentFact.expand();
 							else
 								finalPoly -= currentPoly;
@@ -383,7 +359,7 @@ void Entity::maturation()
 						{
 							if(currentType & FARG_TYPE_NUMBER)
 								finalPoly += currentNumber;
-							else if(currentType & FARG_TYPE_POLY_NOFACT)
+							else if(currentType & FARG_TYPE_FACTORISED)
 								finalPoly += currentFact.expand();
 							else
 								finalPoly += currentPoly;
@@ -396,6 +372,7 @@ void Entity::maturation()
 				{
 					if(matureType & FARG_TYPE_NUMBER && currentType & FARG_TYPE_NUMBER)
 					{
+						std::cout << "[LOG]: " << finalNumber << " / " << currentNumber << " = " << finalNumber / currentNumber << "\n";
 						finalNumber /= currentNumber;
 					}
 					else
@@ -458,10 +435,10 @@ void Entity::maturation()
 			}
 		}
 		
-		if(matureType == FARG_TYPE_NUMBER)
+		if(matureType & FARG_TYPE_NUMBER)
 			numberPure = finalNumber;
 		
-		else if(matureType == FARG_TYPE_FACTORISED)
+		else if(matureType & FARG_TYPE_FACTORISED)
 			polynomeFact = finalFact;
 		
 		else
@@ -470,12 +447,11 @@ void Entity::maturation()
 	
 	isMature = true;
 	isFunction = isContainer = false;
-
 }
 
 void Entity::migrateType(uint8_t newType, Polynomial & finalPoly, PolyFact & finalFact, Complex::complexN & finalNumber)
 {
-	if((matureType & FARG_TYPE_DIV_RESULT) || (newType & FARG_TYPE_DIV_RESULT) || CHOOSEVAR(newType, 1, 2, 3) != CHOOSEVAR(matureType, 1, 2, 3))
+	if(CHOOSEVAR(newType, 1, 2, 3) == CHOOSEVAR(matureType, 1, 2, 3))
 		return;
 
 	if(newType & FARG_TYPE_POLY)
@@ -495,7 +471,7 @@ void Entity::migrateType(uint8_t newType, Polynomial & finalPoly, PolyFact & fin
 	else
 		finalPoly = Polynomial::Polynomial();
 	
-	newType = matureType;
+	matureType = newType;
 }
 
 bool Entity::checkArgumentConsistency() const

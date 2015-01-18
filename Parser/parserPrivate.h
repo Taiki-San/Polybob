@@ -107,7 +107,6 @@ public:
 	bool isFactorisedPoly() const;
 
 	//IO
-	void print(uint depth)	const;
 	void print()		const;
 	void printMonome()	const;
 	

@@ -91,7 +91,7 @@ bool Catalog::variableName(std::string input, std::string & variableName)
 	variableName = input.substr(1, length - 2);
 
 	//We check if there is no illegal character in the variable name
-	for(std::string::const_iterator iterator = variableName.begin(); iterator != input.end(); ++iterator)
+	for(std::string::const_iterator iterator = variableName.begin(); iterator != variableName.end(); ++iterator)
 	{
 		if(*iterator == '{' || *iterator == '}')
 			return false;
@@ -178,7 +178,7 @@ VARIABLE Catalog::variableValue(std::string variableName)
 	}
 	
 	std::stringstream error;
-	error << "Invalid variable access, something went really wrong with '" << variableName << '\'';
+	error << variableName << " doesn't exist";
 	throw std::invalid_argument(error.str());
 }
 

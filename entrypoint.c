@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <stdbool.h>
 
 #include <iostream>
@@ -19,7 +20,8 @@ int main(int argc, char **argv)
 	unsigned int promptNb = 1;
 	char promptMsg[100];
 	bool end = false;
-   
+	
+	srand(time(NULL));
     printLogo();
 
 	/* Set the completion callback. This will be called every time the
