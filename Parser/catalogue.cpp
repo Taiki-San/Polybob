@@ -15,7 +15,7 @@ Catalog::Catalog()
 	functionNames = {"expand", "factor", "evaluate", "interpolate", "composition", "division"};
 	functionArgumentNumber = {1, 1, 2, 0, 2, 2};
 	functionArgumentType = {{FARG_TYPE_FACTORISED}, {FARG_TYPE_POLY_NOFACT}, {FARG_TYPE_POLY, FARG_TYPE_NUMBER}, {FARG_TYPE_REAL}, {FARG_TYPE_POLY, FARG_TYPE_POLY}, {FARG_TYPE_ANY, FARG_TYPE_ANY}};
-	functionReturnType = {FARG_TYPE_POLY_NOFACT, FARG_TYPE_FACTORISED, FARG_TYPE_NUMBER, FARG_TYPE_POLY, FARG_TYPE_POLY, FARG_TYPE_DIV_RESULT};
+	functionReturnType = {FARG_TYPE_POLY_NOFACT, FARG_TYPE_FACTORISED, FARG_TYPE_NUMBER, FARG_TYPE_POLY, FARG_TYPE_POLY_NOFACT, FARG_TYPE_DIV_RESULT};
 }
 
 #pragma mark Function related
@@ -176,7 +176,7 @@ VARIABLE Catalog::variableValue(std::string variableName)
 	
 	std::vector<std::string>::const_iterator iter = instance.variableNames.begin(), end = instance.variableNames.end();
 	
-	for(uint index = 0; iter != end; index++)
+	for(uint index = 0; iter != end; ++iter, index++)
 	{
 		if(*iter == variableName)
 		{
@@ -203,7 +203,7 @@ void Catalog::setVariableValue(std::string variableName, VARIABLE content)
 	std::vector<std::string>::const_iterator iter = instance.variableNames.begin(), end = instance.variableNames.end();
 	uint index = 0;
 	
-	for(; iter != end; index++)
+	for(; iter != end; ++iter, index++)
 	{
 		if(*iter == variableName)
 		{

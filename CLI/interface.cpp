@@ -44,7 +44,7 @@ void parseCommand(const char *command)
 		printf("	- expand 	 : développe un polynôme\n");
 		printf("	- factor 	 : factorise un polynôme\n");
 		printf("	- evaluate 	 : évalue un polynome pour une valeur\n");
-		printf("	- interpolate	 : calcul un polynôme passant par les valeurs réelles données\n");
+//		printf("	- interpolate	 : calcul un polynôme passant par les valeurs réelles données\n");
 		printf("	- composition	 : compose deux polynômes\n");
 		printf("	- division	 : réalise la division euclidienne de deux polynômes\n");
 		printf("			   Attention: / ne réalise pas une division euclidienne\n\n");

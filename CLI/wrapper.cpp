@@ -1,4 +1,5 @@
 #include "wrapper.h"
+#include <stdlib.h>
 
 char* rmSuperscript(char* line)
 {

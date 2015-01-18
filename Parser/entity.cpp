@@ -641,6 +641,7 @@ bool Entity::checkArgumentConsistency()
 			uint power = iter->power;
 			*iter = iter->subLevel[0];
 			iter->power += power - 1;
+			iter->functionArg = true;
 		}
 		
 		if((iter->matureType & curType) == 0)
@@ -697,9 +698,9 @@ void Entity::executeFunction()
 			if(subLevel[0].matureType & FARG_TYPE_FACTORISED)
 				polynomeFact = (subLevel[0].polynomeFact ^ argPower).factor();
 			else
-				polynomeFact = (subLevel[0].polynome ^ argPower).factor();
+				polynomeFact = (subLevel[0].polynomePure ^ argPower).factor();
 #else
-			std::cerr << "Sorry, not implemented yet :/";
+			throw std::invalid_argument("Sorry, not implemented yet :/");
 #endif
 			break;
 		}
@@ -710,9 +711,11 @@ void Entity::executeFunction()
 			if(arg2Power == 0)		arg2Power = 1;
 			
 			if(subLevel[0].matureType & FARG_TYPE_FACTORISED)
+			{
 				numberPure = (subLevel[0].polynomeFact ^ argPower).evaluation(pow(subLevel[1].numberPure, arg2Power));
+			}
 			else
-				numberPure = (subLevel[0].polynome ^ argPower).evaluation(pow(subLevel[1].numberPure, arg2Power));
+				numberPure = (subLevel[0].polynomePure ^ argPower).evaluation(pow(subLevel[1].numberPure, arg2Power));
 			break;
 		}
 			
@@ -726,20 +729,19 @@ void Entity::executeFunction()
 				uint power = iter->power;
 				Complex::complexN current = iter->numberPure;
 				
-				argument.push_back(pow(current, power == 0 ? 1 : power));
+				argument.push_back(pow(current, power));
 			}
 			
 			polynomePure = polynomePure.composition(argument);
 #else
-			std::cerr << "Sorry, not implemented yet :/";
-#endif			
+			throw std::invalid_argument("Sorry, not implemented yet :/");
+#endif
 			break;
 		}
 		
 		case FCODE_COMPOSITION:
 		{
 			uint arg2Power = subLevel[1].power;
-			if(arg2Power == 0)		arg2Power = 1;
 			
 			if(subLevel[0].matureType & FARG_TYPE_FACTORISED)
 			{
@@ -780,9 +782,9 @@ void Entity::executeFunction()
 					poly += subLevel[0].numberPure;
 					
 					if(currentType & FARG_TYPE_POLY_NOFACT)
-						divisionResult = poly / subLevel[1].polynomeFact.expand();
-					else
 						divisionResult = poly / subLevel[1].polynomePure;
+					else
+						divisionResult = poly / subLevel[1].polynomeFact.expand();
 				}
 				else if(matureType & FARG_TYPE_FACTORISED)
 				{
@@ -794,9 +796,9 @@ void Entity::executeFunction()
 						divisionResult = poly2 / poly;
 					}
 					else if(currentType & FARG_TYPE_POLY_NOFACT)
-						divisionResult = poly / subLevel[1].polynomeFact.expand();
+						divisionResult = poly2 / subLevel[1].polynomePure;
 					else
-						divisionResult = poly / subLevel[1].polynomePure;
+						divisionResult = poly2 / subLevel[1].polynomeFact.expand();
 				}
 				else
 				{
@@ -808,9 +810,9 @@ void Entity::executeFunction()
 						divisionResult = poly2 / poly;
 					}
 					else if(currentType & FARG_TYPE_POLY_NOFACT)
-						divisionResult = poly / subLevel[1].polynomeFact.expand();
+						divisionResult = poly2 / subLevel[1].polynomePure;
 					else
-						divisionResult = poly / subLevel[1].polynomePure;
+						divisionResult = poly2 / subLevel[1].polynomeFact.expand();
 				}
 
 			}

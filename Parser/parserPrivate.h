@@ -32,7 +32,7 @@ enum
 	OP_PLUS		= 1 << 4,
 	OP_MINUS	= 1 << 5
 
-} OPERATORS;
+};
 
 enum
 {
@@ -44,7 +44,7 @@ enum
 	FCODE_DIVISION		= 5,
 	MAX_FUNC_ID			= FCODE_DIVISION,
 	INVALID_FUNCTION_ID = UINT_MAX
-} FUNCTION_CODES;
+};
 
 enum
 {
@@ -69,6 +69,7 @@ enum
 #pragma mark Structures
 
 typedef struct Monomial monome;
+typedef std::pair<Polynomial, Polynomial> divResult;
 
 #pragma mark Entity
 
@@ -188,6 +189,7 @@ public:
 #pragma mark Parser core
 
 Entity _parserCore(std::string input, int opType);
+void addEntityToVar(std::string variable, Entity entity);
 Entity _parseEntity(std::string level);
 std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions);
 Entity parseMonome(std::string str);

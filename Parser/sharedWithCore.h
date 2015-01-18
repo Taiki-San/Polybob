@@ -7,16 +7,12 @@
 #include <list>
 #include <cmath>
 
-/*
- *	Placeholder until real classes are added
- */
-
 #include "../Maths/complex.h"
 #include "../Maths/factor.h"
 #include "../Maths/monomial.h"
 #include "../Maths/polyfact.h"
 #include "../Maths/polynomial.h"
 
-typedef std::pair<Polynomial, Polynomial> divResult;
+typedef class PolyFact PolyFact;
 
 #endif

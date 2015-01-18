@@ -8,14 +8,13 @@
 #include "parser.h"
 #include "CLI/wrapper.h"
 
-#include "CLI/linenoise.h"
+#include "Libraries/linenoise.h"
 #include "CLI/interface.h"
 
 #define HIST_FILENAME ".polyBobHistory"
 
 int main(int argc, char **argv)
 {
-	simpleParserAPI("13x+23+(25*7)+9");
 	char* line;
 	unsigned int promptNb = 1;
 	char promptMsg[100];

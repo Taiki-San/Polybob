@@ -39,18 +39,7 @@ Entity _parserCore(std::string input, int opType)
 		
 	if(opType == TYPE_OP_ALLOC)
 	{
-		VARIABLE content;
-		
-		content.type = output.matureType;
-		if(content.type & FARG_TYPE_NUMBER)
-			content.number = output.numberPure;
-		else if(content.type & FARG_TYPE_FACTORISED)
-			content.PolyFact = output.polynomeFact;
-		else
-			content.polynomial = output.polynomePure;
-		
-		Catalog::setVariableValue(receiver, content);
-
+		addEntityToVar(receiver, output);
 		output.print();
 	}
 	else if(opType == TYPE_OP_COMPARE)
@@ -82,7 +71,24 @@ Entity _parserCore(std::string input, int opType)
 		output.print();
 	}
 	
+	addEntityToVar("ans", output);
+	
 	return output;
+}
+
+void addEntityToVar(std::string variable, Entity entity)
+{
+	VARIABLE content;
+	
+	content.type = entity.matureType;
+	if(content.type & FARG_TYPE_NUMBER)
+		content.number = entity.numberPure;
+	else if(content.type & FARG_TYPE_FACTORISED)
+		content.PolyFact = entity.polynomeFact;
+	else
+		content.polynomial = entity.polynomePure;
+	
+	Catalog::setVariableValue(variable, content);
 }
 
 Entity _parseEntity(std::string level)

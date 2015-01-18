@@ -6,7 +6,7 @@
 #include <string.h>
 #include <sys/ioctl.h>
 
-#include "linenoise.h"
+#include "../Libraries/linenoise.h"
 
 void completion(const char *buf, linenoiseCompletions *lc);
 void parseCommand(const char *command);

@@ -1,16 +1,12 @@
 CC = g++
 
-BASE_FLAGS  =  -Wall -std=gnu++11
+BASE_FLAGS  = -fpermissive -std=gnu++11 -O2
 
 # INCLUDE BASE DIRECTORY AND BOOST DIRECTORY FOR HEADERS
-LDFLAGS = -I/usr/local/Cellar/boost/1.57.0/include
-
-# INCLUDE BASE DIRECTORY AND BOOST DIRECTORY FOR LIB FILES
-LLIBFLAGS = -L/usr/local/Cellar/boost/1.57.0/
+LDFLAGS = -I../Libraries/
 
 # FINAL FLAGS -- TO BE USED THROUGHOUT
 FLAGS = $(BASE_FLAGS) $(LDFLAGS)
-LINKFLAG = $(LLIBFLAGS) $(LINKFLAGS)
 
 all: clever
 
