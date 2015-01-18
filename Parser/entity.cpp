@@ -181,7 +181,20 @@ void Entity::printMonome() const
 
 #define CHOOSEVAR(__type, __poly, __fact, __complex) ((__type & FARG_TYPE_FACTORISED) ? (__fact) : ((__type & FARG_TYPE_NUMBER) ? (__complex) : (__poly)))
 
-void Entity::maturation()
+//MT support
+static unsigned char runningThreads;
+static size_t cut[4];
+static Entity * _mainEntity;
+
+static bool error;
+static std::string errorMessage;
+
+void maturationWrapper(unsigned * currentThread)
+{
+	_mainEntity->maturation(*currentThread);
+}
+
+void Entity::maturation(char threadID)
 {
 	if(isMature)
 		return;
@@ -189,8 +202,103 @@ void Entity::maturation()
 	//We mature the sub-elems
 	if(isContainer)
 	{
-		for(std::vector<Entity>::iterator iter = subLevel.begin(); iter != subLevel.end(); ++iter)
-			iter->maturation();
+		//Yay, multi-threading
+		if(threadID == 0)
+		{
+			size_t length = subLevel.size(), count = 0;
+			unsigned char argument[3] = {1, 2, 3};
+			
+			//If only one element, we check lower
+			if(length == 1)
+			{
+				return this->maturation(0);
+			}
+			
+			_mainEntity = this;
+			error = false;
+			
+			//If less than 4 elems, we launch 1 thread per element
+			if(length <= 4)
+			{
+				cut[0] = 1;
+
+				runningThreads = length - 1;
+
+				for(uint i = 1; i < length; i++)
+				{
+					cut[i] = i + 1;
+					createNewThread((void*) maturationWrapper, &argument[i-1]);
+				}
+			}
+			//Otherwise, we dispatch the load, with most of it on the main thread
+			else
+			{
+				size_t part = length / 4;
+				cut[0] = part + length % 4;
+				runningThreads = 3;
+				
+				for(uint i = 1; i < length; i++)
+				{
+					cut[i] = cut[i - 1] + part;
+					createNewThread((void*) maturationWrapper, &argument[i-1]);
+				}
+			}
+			
+			//We mature until our entry
+			for(std::vector<Entity>::iterator iter = subLevel.begin(); !error && iter != subLevel.end() && count < cut[0]; ++iter, ++count)
+				iter->maturation(-1);
+			
+			//Wait for others to end their task
+			while(1)
+			{
+				MUTEX_LOCK;
+				if(runningThreads == 0)
+					break;
+				MUTEX_UNLOCK;
+				
+				usleep(50000);
+			}
+			MUTEX_UNLOCK;
+
+			//If any error, we abort
+			if(error)
+			{
+				throw std::invalid_argument(errorMessage);
+			}
+			
+		}
+		//Code used by sub-threads
+		else if(threadID > 0 && threadID < 4)
+		{
+			size_t count = cut[threadID - 1];
+			std::vector<Entity>::iterator iter = subLevel.begin();
+			
+			for(size_t i = 0; iter != subLevel.end() && i < count; ++iter, ++i);
+			
+			try
+			{
+				for(;!error && iter != subLevel.end() && count < cut[threadID]; ++iter, ++count)
+					iter->maturation(-1);
+			}
+			catch (const std::exception & e)
+			{
+				error = true;
+				errorMessage = e.what();
+			}
+			
+			MUTEX_LOCK;
+			runningThreads--;
+			MUTEX_UNLOCK;
+			
+			pthread_exit(0);
+		}
+		
+		//Standard cycle
+		else
+		{
+			for(std::vector<Entity>::iterator iter = subLevel.begin(); iter != subLevel.end(); ++iter)
+				iter->maturation(-1);
+		}
 	}
 	
 	//Now, let's evaluate the content
@@ -431,7 +539,7 @@ void Entity::maturation()
 				default:
 				{
 					std::stringstream error;
-					error << "Unexpected operand! (" << iter->previousOperator << ") Can't really dump the context, sorry :/";
+					error << "Unexpected operand! (" << int(iter->previousOperator) << ") Can't really dump the context, sorry :/";
 					throw std::invalid_argument(error.str());
 				}
 			}

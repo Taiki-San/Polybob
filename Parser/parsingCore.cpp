@@ -30,12 +30,12 @@ Entity _parserCore(std::string input, int opType)
 			input.erase(0, 1);	//We remove the second =
 			auxiliary = _parseEntity(part1);
 			
-			auxiliary.maturation();
+			auxiliary.maturation(0);
 		}
 	}
 	
 	output = _parseEntity(input);
-	output.maturation();
+	output.maturation(0);
 		
 	if(opType == TYPE_OP_ALLOC)
 	{
@@ -161,7 +161,7 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions)
 		
 		entity = _parseEntity(level.substr(basePos, *current - basePos));
 
-		if(basePos <= 1)
+		if(basePos == 0)
 			entity.previousOperator = OP_NONE;
 		else
 		{

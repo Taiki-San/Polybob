@@ -24,41 +24,21 @@ char* rmSuperscript(char* line)
 
 char * getSuggestion(const char * begining)
 {
-	printf("\nGo\n");
-	bool firstPass = true, noVar = false, noFunc = false;
 	uint length = strlen(begining);
 	
-	while(length-- > 0 && (!noVar || !noFunc))
+	while(length-- > 0)
 	{
-		if(!noVar && begining[length] == '{')
+		if(begining[length] == '{')
 		{
-			std::string string = &(begining[length+1]), output;
+			std::string output;
 			
-			if(haveVariableSuggestion(string, output))
+			if(haveVariableSuggestion(begining, output))
 			{
 				return strdup(output.c_str());
 			}
 			else
-				noVar = true;
-			
-			return NULL;
+				return NULL;
 		}
-		else if(!noFunc && (begining[length] < 'a' || begining[length] > 'z'))
-		{
-			if(!firstPass)
-			{
-				std::string string = &(begining[length+1]), output;
-				
-				if(haveFunctionSuggestion(string, output))
-				{
-					return strdup(output.c_str());
-				}
-			}
-			
-			noFunc = true;
-		}
-		
-		firstPass = false;
 	}
 	
 	return NULL;

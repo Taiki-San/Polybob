@@ -4,6 +4,9 @@
 #include <map>
 #include <complex>
 #include <algorithm>
+
+#include <unistd.h>
+
 #include "../parser.h"
 #include "sharedWithCore.h"
 
@@ -119,7 +122,7 @@ public:
 	void printMonome()	const;
 	
 	//Maturation
-	void maturation();
+	void maturation(char threadID);
 	void executeFunction();
 	bool isMature;
 };
@@ -169,7 +172,6 @@ public:
 	
 	//Auto-completion
 	static bool haveVariableSuggestion(std::string begining, std::string & suggestion);
-	static bool haveFunctionSuggestion(std::string begining, std::string & suggestion);
 	
 	//Variable manipulation
 	static VARIABLE variableValue(std::string variableName);

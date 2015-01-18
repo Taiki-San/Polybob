@@ -36,8 +36,3 @@ bool haveVariableSuggestion(std::string begining, std::string & suggestion)
 {
 	return Catalog::haveVariableSuggestion(begining, suggestion);
 }
-
-bool haveFunctionSuggestion(std::string begining, std::string & suggestion)
-{
-	return Catalog::haveFunctionSuggestion(begining, suggestion);
-}

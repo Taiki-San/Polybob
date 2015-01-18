@@ -113,13 +113,27 @@ bool Catalog::isVariable(std::string input)
 bool Catalog::haveVariableSuggestion(std::string begining, std::string & suggestion)
 {
 	Catalog & instance = Catalog::Instance();
-	return findSuggestion(begining, instance.functionNames, suggestion);;
-}
+	
+	std::string copy = begining;
+	size_t position = begining.find_last_of('{');
+	
+	copy.erase(0, position + 1);
 
-bool Catalog::haveFunctionSuggestion(std::string begining, std::string & suggestion)
-{
-	Catalog & instance = Catalog::Instance();
-	return findSuggestion(begining, instance.functionNames, suggestion);
+	if(findSuggestion(copy, instance.variableNames, suggestion))
+	{
+		if(position != -1)
+			begining.erase(position);
+	
+		begining += '{';
+		begining += suggestion;
+		begining += '}';
+		
+		suggestion = begining;
+
+		return true;
+	}
+
+	return false;
 }
 
 bool Catalog::findSuggestion(std::string begining, std::vector<std::string> source, std::string & suggestion)

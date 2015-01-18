@@ -15,6 +15,7 @@
 
 int main(int argc, char **argv)
 {
+	simpleParserAPI("13x+23+(25*7)+9");
 	char* line;
 	unsigned int promptNb = 1;
 	char promptMsg[100];
