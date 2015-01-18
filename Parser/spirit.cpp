@@ -128,7 +128,7 @@ Entity parseMonome(std::string str)
 	}
 
 	std::stringstream error;
-	error << "Parsing failed, stopped at: \" " << std::string(begin, end) << "\"" << " ~ full string: " << str;
+	error << "Parsing failed, stopped at: " << std::string(begin, end);
 	throw std::invalid_argument(error.str());
 	
 	return Entity();

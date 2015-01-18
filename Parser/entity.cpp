@@ -133,11 +133,13 @@ void Entity::print() const
 {
 	if(matureType & FARG_TYPE_DIV_RESULT)
 	{
-		std::cout << "Quotient: 	" << divisionResult.first.toString() << '\n';
-		std::cout << "Remaining:	" << divisionResult.second.toString() << '\n';
+		std::cout << "Quotient: 	" << divisionResult.first.toString() << std::endl;
+		std::cout << "Remaining:	" << divisionResult.second.toString();
 	}
 	else
 	{
+		std::cout << " => ";
+		
 		if(power  > 1)
 			std::cout << '(';
 		
@@ -151,6 +153,8 @@ void Entity::print() const
 		if(power  > 1)
 			std::cout << ")^" << power << ' ';
 	}
+	
+	std::cout << std::endl;
 }
 
 void Entity::printMonome() const
@@ -371,10 +375,8 @@ void Entity::maturation()
 				case OP_DIV:
 				{
 					if(matureType & FARG_TYPE_NUMBER && currentType & FARG_TYPE_NUMBER)
-					{
-						std::cout << "[LOG]: " << finalNumber << " / " << currentNumber << " = " << finalNumber / currentNumber << "\n";
 						finalNumber /= currentNumber;
-					}
+
 					else
 					{
 						std::stringstream error;

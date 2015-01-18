@@ -7,7 +7,6 @@
 #include "../parser.h"
 #include "sharedWithCore.h"
 
-#define VERBOSE
 #define SPIRIT_DEFAULT_POWER_VALUE 0
 
 #pragma mark - Multithreading

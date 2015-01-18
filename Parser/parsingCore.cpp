@@ -47,6 +47,8 @@ Entity _parserCore(std::string input, int opType)
 		content.PolyFact = output.polynomeFact;
 		
 		Catalog::setVariableValue(receiver, content);
+
+		output.print();
 	}
 	else if(opType == TYPE_OP_COMPARE)
 	{
@@ -62,7 +64,6 @@ Entity _parserCore(std::string input, int opType)
 			
 			else
 			{
-				std::cout << output.polynomePure.toString() << " ~ " << auxiliary.polynomePure.toString() << '\n';
 				equal = output.polynomePure == auxiliary.polynomePure;
 			}
 		}
@@ -149,9 +150,6 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions)
 	//Positions contain the index of operators
 	for(std::vector<uint>::const_iterator current = positions.begin(); current != positions.end(); ++current)
 	{
-#ifdef VERBOSE
-		std::cout << "[LOG]: Current portion: " << level.substr(basePos, *current-basePos) << '\n';
-#endif
 		//We're trying to add something after divising, that is not allowed
 		if(doesDiv)
 		{

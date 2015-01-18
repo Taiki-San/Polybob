@@ -30,8 +30,6 @@ void simpleParserAPI(char * cString)
 		std::cerr << e.what() << std::endl;
 		return;
 	}
-	
-	input.print();
 }
 
 bool haveVariableSuggestion(std::string begining, std::string & suggestion)

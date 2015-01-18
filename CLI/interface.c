@@ -1,4 +1,5 @@
 #include "interface.h"
+#include "wrapper.h"
 
 #define RED  "\033[22;31m"
 #define RESET  "\033[0m"
@@ -18,24 +19,36 @@ void completion(const char *buf, linenoiseCompletions *lc)
 	{
 		linenoiseAddCompletion(lc, "quit");
 	}
+	else
+	{
+		char * suggestion = getSuggestion(buf);
+		if(suggestion != NULL)
+		{
+			linenoiseAddCompletion(lc, suggestion);
+			free(suggestion);
+		}
+	}
 }
 
 void parseCommand(const char *command)
 {
 	if(!strcmp(command, "help"))
 	{
-		char txt[500] = "";
-		FILE *help = fopen("HELP", "r");
-		if(help == NULL)
-			printf("Unable to open help\n");
-
-		while(fgets(txt, 500, help) != NULL)
-		{
-			printf("%s", txt);
-			fflush(stdout);
-		}
-		printf("\n");
-		fclose(help);
+		printf("Bienvenue dans l'asistance de Polybob!\n");
+		printf("Notre syntaxe est la suivante, les opérateurs standards sont supportés\n");
+		printf("Vous pouvez utiliser des variables en tapant {nom de la variable}\n");
+		printf("Attention, les espaces seront ignorés\n\n");
+		printf("Un certain nombre de fonctions sont supportés, vous pouvez les appeler de la manière suivante:\n");
+		printf("nomDeLaFonction[argument1, argument2]\n\n");
+		printf("Liste des fonctions:\n");
+		printf("	- expand 	 : développe un polynôme\n");
+		printf("	- factor 	 : factorise un polynôme\n");
+		printf("	- evaluate 	 : évalue un polynome pour une valeur\n");
+		printf("	- interpolate	 : calcul un polynôme passant par les valeurs réelles données\n");
+		printf("	- composition	 : compose deux polynômes\n");
+		printf("	- division	 : réalise la division euclidienne de deux polynômes\n");
+		printf("			   Attention: / ne réalise pas une division euclidienne\n\n");
+		printf("Nous espérons que Polybob pourra vous satisfaire.\n");
 	}
 	else if(!strncmp(command,"historylen",10))
 	{
