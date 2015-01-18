@@ -67,7 +67,7 @@ Entity _parseSubElement(VARIABLE element, int prevOP)
 		stage.numberPure = element.number;
 	
 	else if(element.type & FARG_TYPE_FACTORISED)
-		stage.polynomeFact = element.polynomialFact;
+		stage.polynomeFact = element.PolyFact;
 	
 	else
 		stage.polynomePure = element.polynomial;

@@ -57,7 +57,7 @@ VARIABLE convertSpirit(std::string string)
 					variable.number *= complex;
 				
 				else if(variable.type & FARG_TYPE_FACTORISED)
-					variable.polynomialFact *= complex;
+					variable.PolyFact *= complex;
 				
 				else
 					variable.polynomial *= complex;

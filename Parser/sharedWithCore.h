@@ -12,41 +12,11 @@
  */
 
 #include "../Maths/complex.h"
+#include "../Maths/factor.h"
 #include "../Maths/monomial.h"
+#include "../Maths/polyfact.h"
 #include "../Maths/polynomial.h"
 
-typedef struct factorisedElem
-{
-	Complex::complexN coef;
-	uint power;
-} factorisedElem;
-
-typedef struct divResult
-{
-	uint quotient;
-	uint remain;
-	
-} divResult;
-
-typedef std::vector<factorisedElem> vectorFact_t;
-
-//Factorised
-class PolynomialFact
-{
-public:
-	/*
-	 * Par convention, le degré d’un polynôme nul est -∞. Ici, on réserve UINT_MAX
-	 * pour cet usage.
-	 */
-	static const unsigned int ZERO_POLYNOMIAL_DEGREE = UINT_MAX;
-	
-	//Création d’un polynôme nul
-	PolynomialFact();
-	//Création d’un polynôme avec les monômes donnés en argument
-	PolynomialFact(vectorFact_t monomials);
-	//Création d’un polynôme à partir d’un autre polynôme donné en argument
-	PolynomialFact(const PolynomialFact &poly);
-};
-
+typedef std::pair<Polynomial, Polynomial> divResult;
 
 #endif

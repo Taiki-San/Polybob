@@ -7,17 +7,15 @@ Catalog& Catalog::Instance()
 	return instance;
 }
 
-#define MAX_FUNC_ID FCODE_DUMP
-
 Catalog::Catalog()
 {
 	haveCache = false;
 	
-	functionCodes = {FCODE_EXPAND, FCODE_FACTOR, FCODE_EVALUATE, FCODE_INTERPOLATE, FCODE_COMPOSITION, FCODE_TEST, FCODE_DUMP};
-	functionNames = {"expand", "factor", "evaluate", "interpolate", "composition", "test", "dump"};
-	functionArgumentNumber = {1, 1, 2, 0, 2};
-	functionArgumentType = {{FARG_TYPE_FACTORISED}, {FARG_TYPE_POLY_NOFACT}, {FARG_TYPE_POLY, FARG_TYPE_NUMBER}, {FARG_TYPE_REAL}, {FARG_TYPE_POLY, FARG_TYPE_POLY}};
-	functionReturnType = {FARG_TYPE_POLY_NOFACT, FARG_TYPE_FACTORISED, FARG_TYPE_NUMBER, FARG_TYPE_POLY, FARG_TYPE_POLY};
+	functionCodes = {FCODE_EXPAND, FCODE_FACTOR, FCODE_EVALUATE, FCODE_INTERPOLATE, FCODE_COMPOSITION, FCODE_DIVISION};
+	functionNames = {"expand", "factor", "evaluate", "interpolate", "composition", "division"};
+	functionArgumentNumber = {1, 1, 2, 0, 2, 2};
+	functionArgumentType = {{FARG_TYPE_FACTORISED}, {FARG_TYPE_POLY_NOFACT}, {FARG_TYPE_POLY, FARG_TYPE_NUMBER}, {FARG_TYPE_REAL}, {FARG_TYPE_POLY, FARG_TYPE_POLY}, {FARG_TYPE_ANY, FARG_TYPE_ANY}};
+	functionReturnType = {FARG_TYPE_POLY_NOFACT, FARG_TYPE_FACTORISED, FARG_TYPE_NUMBER, FARG_TYPE_POLY, FARG_TYPE_POLY, FARG_TYPE_DIV_RESULT};
 }
 
 #pragma mark Function related

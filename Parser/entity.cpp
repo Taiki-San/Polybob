@@ -204,7 +204,7 @@ void Entity::printMonome() const
 
 #pragma mark - Maturation
 
-#define CHOOSEVAR(__type, __poly, __fact, __complex) ((__type & FARG_TYPE_FACTORISED) ? __fact : ((__type & FARG_TYPE_NUMBER) ? __complex : __poly))
+#define CHOOSEVAR(__type, __poly, __fact, __complex) ((__type & FARG_TYPE_FACTORISED) ? (__fact) : ((__type & FARG_TYPE_NUMBER) ? (__complex) : (__poly)))
 
 void Entity::maturation()
 {
@@ -229,14 +229,12 @@ void Entity::maturation()
 
 		else if(matureType & FARG_TYPE_FACTORISED)
 		{
-			factorisedElem element;
-			element.coef = _monome.coeff;
-			element.power = power;
+			Factor element = Factor(0, power);
 
-			vectorFact_t vector;
+			vectorFactors_t vector;
 			vector.push_back(element);
 			
-			polynomeFact = PolynomialFact(vector);
+			polynomeFact = PolyFact(vector, _monome.coeff);
 			power = 1;
 		}
 		else
@@ -255,7 +253,7 @@ void Entity::maturation()
 		//	My earlier parser didn't messed with me :X
 		
 		/*
-		 *	We work on 3 types, Polynomial, PolynomialFact and Complex, and things get funny
+		 *	We work on 3 types, Polynomial, PolyFact and Complex, and things get funny
 		 *
 		 *	+|-		Complex + Complex 	= Complex
 		 *			Sinon, 				Poly
@@ -272,14 +270,14 @@ void Entity::maturation()
 		
 		std::vector<Entity>::const_iterator iter = subLevel.begin();
 		
-		bool firstRun = true, fullyFactorised = false;
+		bool fullyFactorised = false;
 		uint8_t currentType;
 		uint currentPower;
 		
 		matureType = FARG_TYPE_NUMBER;
 		
 		Polynomial finalPoly = Polynomial(), currentPoly;
-		PolynomialFact finalFact = PolynomialFact(), currentFact;
+		PolyFact finalFact = PolyFact(), currentFact;
 		Complex::complexN finalNumber = Complex::complexN(0, 0), currentNumber;
 
 		currentPower = iter->power;
@@ -300,6 +298,13 @@ void Entity::maturation()
 				finalFact = iter->polynomeFact;
 			}
 			
+			else if(currentType & FARG_TYPE_DIV_RESULT)
+			{
+				std::stringstream error;
+				error << "You can't reuse the output of an euclidian division";
+				throw std::invalid_argument(error.str());
+			}
+			
 			else
 			{
 				finalPoly = iter->polynomePure ^ currentPower;
@@ -311,11 +316,19 @@ void Entity::maturation()
 			currentType = iter->matureType;
 			currentPower = iter->power;
 			
+			//Sanity check
+			if(currentType & FARG_TYPE_DIV_RESULT)
+			{
+				std::stringstream error;
+				error << "You can't reuse the output of an euclidian division";
+				throw std::invalid_argument(error.str());
+			}
+			
 			//We're not anymore a factorised form :(
 			if(fullyFactorised && (currentType & (FARG_TYPE_FACTORISED | FARG_TYPE_NUMBER)) == 0)
 			{
-				currentPoly += finalFact;
-				finalFact = PolynomialFact::PolynomialFact();
+				currentPoly += finalFact.expand();
+				finalFact = PolyFact::PolyFact();
 				fullyFactorised = false;
 			}
 
@@ -355,20 +368,42 @@ void Entity::maturation()
 					{
 						//Hum, we need to move our value in the appropriate variable, as type is about to change
 						if((matureType & FARG_TYPE_NUMBER) || (matureType & FARG_TYPE_FACTORISED))
-							migrateType(currentType, finalPoly, finalFact, finalNumber);
+							migrateType(FARG_TYPE_POLY, finalPoly, finalFact, finalNumber);
 
 						if(iter->previousOperator == OP_MINUS)
-							CHOOSEVAR(matureType, finalPoly, finalFact, finalNumber) -= CHOOSEVAR(currentType, currentPoly, currentFact, currentNumber);
+						{
+							if(currentType & FARG_TYPE_NUMBER)
+								finalPoly -= currentNumber;
+							else if(currentType & FARG_TYPE_POLY_NOFACT)
+								finalPoly -= currentFact.expand();
+							else
+								finalPoly -= currentPoly;
+						}
 						else
-							CHOOSEVAR(matureType, finalPoly, finalFact, finalNumber) += CHOOSEVAR(currentType, currentPoly, currentFact, currentNumber);
+						{
+							if(currentType & FARG_TYPE_NUMBER)
+								finalPoly += currentNumber;
+							else if(currentType & FARG_TYPE_POLY_NOFACT)
+								finalPoly += currentFact.expand();
+							else
+								finalPoly += currentPoly;
+						}
 					}
 					break;
 				}
 					
 				case OP_DIV:
 				{
-					divisionResult = CHOOSEVAR(matureType, finalPoly, finalFact, finalNumber) / CHOOSEVAR(currentType, currentPoly, currentFact, currentNumber);
-					matureType = FARG_TYPE_DIV_RESULT;
+					if(matureType & FARG_TYPE_NUMBER && currentType & FARG_TYPE_NUMBER)
+					{
+						finalNumber /= currentNumber;
+					}
+					else
+					{
+						std::stringstream error;
+						error << "Invalid division, '/' operator can only be used with numbers! Use division[] to play with polynoms";
+						throw std::invalid_argument(error.str());
+					}
 					break;
 				}
 
@@ -403,7 +438,12 @@ void Entity::maturation()
 						if(matureType & (FARG_TYPE_NUMBER | FARG_TYPE_FACTORISED))
 							migrateType(FARG_TYPE_POLY, finalPoly, finalFact, finalNumber);
 						
-						finalPoly *= CHOOSEVAR(currentType, currentPoly, currentFact, currentNumber);
+						if(currentType & FARG_TYPE_NUMBER)
+							finalPoly *= currentNumber;
+						else if(currentType & FARG_TYPE_POLY_NOFACT)
+							finalPoly *= currentFact.expand();
+						else
+							finalPoly *= currentPoly;
 					}
 
 					break;
@@ -433,18 +473,24 @@ void Entity::maturation()
 
 }
 
-void Entity::migrateType(uint8_t newType, Polynomial & finalPoly, PolynomialFact & finalFact, Complex::complexN & finalNumber)
+void Entity::migrateType(uint8_t newType, Polynomial & finalPoly, PolyFact & finalFact, Complex::complexN & finalNumber)
 {
 	if((matureType & FARG_TYPE_DIV_RESULT) || (newType & FARG_TYPE_DIV_RESULT) || CHOOSEVAR(newType, 1, 2, 3) != CHOOSEVAR(matureType, 1, 2, 3))
 		return;
 
-	CHOOSEVAR(newType, finalPoly, finalFact, finalNumber) += CHOOSEVAR(matureType, finalPoly, finalFact, finalNumber);
+	if(newType & FARG_TYPE_POLY)
+	{
+		if(matureType & FARG_TYPE_NUMBER)
+			finalPoly += finalNumber;
+		else
+			finalPoly += finalFact.expand();
+	}
 	
 	if(matureType & FARG_TYPE_NUMBER)
 		finalNumber = Complex::complexN(0, 0);
 
 	else if(matureType & FARG_TYPE_FACTORISED)
-		finalFact = PolynomialFact::PolynomialFact();
+		finalFact = PolyFact::PolyFact();
 	
 	else
 		finalPoly = Polynomial::Polynomial();
@@ -496,7 +542,8 @@ void Entity::executeFunction()
 	
 	uint retType = Catalog::getFuncReturnType(functionCode), argPower = subLevel[0].power;
 	
-	if(argPower == 0)	argPower = 1;
+	if(argPower == 0)
+		argPower = 1;
 
 	//We apply power on the fly, so things get pretty dirty
 	
@@ -504,16 +551,20 @@ void Entity::executeFunction()
 	{
 		case FCODE_EXPAND:
 		{
-			CHOOSEVAR(retType, polynomePure, polynomeFact, numberPure) = (subLevel[0].polynomeFact ^ argPower).expand();
+			polynomePure = (subLevel[0].polynomeFact ^ argPower).expand();
 			break;
 		}
 			
 		case FCODE_FACTOR:
 		{
+#if 0
 			if(subLevel[0].matureType & FARG_TYPE_FACTORISED)
-				CHOOSEVAR(retType, polynomePure, polynomeFact, numberPure) = (subLevel[0].polynomeFact ^ argPower).factor();
+				polynomeFact = (subLevel[0].polynomeFact ^ argPower).factor();
 			else
-				CHOOSEVAR(retType, polynomePure, polynomeFact, numberPure) = (subLevel[0].polynomeFact ^ argPower).factor();
+				polynomeFact = (subLevel[0].polynome ^ argPower).factor();
+#else
+			std::cerr << "Sorry, not implemented yet :/";
+#endif
 			break;
 		}
 			
@@ -523,14 +574,15 @@ void Entity::executeFunction()
 			if(arg2Power == 0)		arg2Power = 1;
 			
 			if(subLevel[0].matureType & FARG_TYPE_FACTORISED)
-				CHOOSEVAR(retType, polynomePure, polynomeFact, numberPure) = (subLevel[0].polynomeFact ^ argPower).eval(pow(subLevel[1].numberPure, arg2Power));
+				numberPure = (subLevel[0].polynomeFact ^ argPower).evaluation(pow(subLevel[1].numberPure, arg2Power));
 			else
-				CHOOSEVAR(retType, polynomePure, polynomeFact, numberPure) = (subLevel[0].polynomeFact ^ argPower).eval(pow(subLevel[1].numberPure, arg2Power));
+				numberPure = (subLevel[0].polynome ^ argPower).evaluation(pow(subLevel[1].numberPure, arg2Power));
 			break;
 		}
 			
 		case FCODE_INTERPOLATE:
 		{
+#if 0
 			std::vector<Complex::complexN> argument;
 			
 			for(std::vector<Entity>::const_iterator iter = subLevel.begin(); iter != subLevel.end(); ++iter)
@@ -541,8 +593,10 @@ void Entity::executeFunction()
 				argument.push_back(pow(current, power == 0 ? 1 : power));
 			}
 			
-			CHOOSEVAR(retType, polynomePure, polynomeFact, numberPure) = polynomePure.composition(argument);
-			
+			polynomePure = polynomePure.composition(argument);
+#else
+			std::cerr << "Sorry, not implemented yet :/";
+#endif			
 			break;
 		}
 		
@@ -552,12 +606,82 @@ void Entity::executeFunction()
 			if(arg2Power == 0)		arg2Power = 1;
 			
 			if(subLevel[0].matureType & FARG_TYPE_FACTORISED)
-				CHOOSEVAR(retType, polynomePure, polynomeFact, numberPure) = (subLevel[0].polynomeFact ^ argPower).compose(((subLevel[1].matureType & FARG_TYPE_FACTORISED) ? subLevel[1].polynomeFact : subLevel[1].polynomePure) ^ arg2Power);
+			{
+				if(subLevel[1].matureType & FARG_TYPE_FACTORISED)
+					polynomePure = (subLevel[0].polynomeFact ^ argPower).composition((subLevel[1].polynomeFact ^ arg2Power).expand());
+				else
+					polynomePure = (subLevel[0].polynomeFact ^ argPower).composition(subLevel[1].polynomePure ^ arg2Power);
+			}
 			else
-				CHOOSEVAR(retType, polynomePure, polynomeFact, numberPure) = (subLevel[0].polynomePure ^ argPower).compose(((subLevel[1].matureType & FARG_TYPE_FACTORISED) ? subLevel[1].polynomeFact : subLevel[1].polynomePure) ^ arg2Power);
+			{
+				if(subLevel[1].matureType & FARG_TYPE_FACTORISED)
+					polynomePure = (subLevel[0].polynomePure ^ argPower).composition((subLevel[1].polynomeFact ^ arg2Power).expand());
+				else
+					polynomePure = (subLevel[0].polynomePure ^ argPower).composition(subLevel[1].polynomePure ^ arg2Power);
+			}
 			break;
 		}
 			
+		case FCODE_DIVISION:
+		{
+			if(subLevel[0].matureType & FARG_TYPE_NUMBER && subLevel[1].matureType & FARG_TYPE_NUMBER)
+			{
+				Complex::complexN out = subLevel[0].numberPure / subLevel[1].numberPure;
+				
+				out.real(floor(out.real()));
+				out.imag(floor(out.imag()));
+				
+				divisionResult.first += out;
+				divisionResult.second += subLevel[0].numberPure - out * subLevel[1].numberPure;
+			}
+			else
+			{
+				uint currentType = subLevel[1].matureType;
+				Polynomial poly = Polynomial::Polynomial(), poly2;
+
+				if(subLevel[0].matureType & FARG_TYPE_NUMBER)
+				{
+					poly += subLevel[0].numberPure;
+					
+					if(currentType & FARG_TYPE_POLY_NOFACT)
+						divisionResult = poly / subLevel[1].polynomeFact.expand();
+					else
+						divisionResult = poly / subLevel[1].polynomePure;
+				}
+				else if(matureType & FARG_TYPE_FACTORISED)
+				{
+					poly2 = subLevel[0].polynomeFact.expand();
+					
+					if(currentType & FARG_TYPE_NUMBER)
+					{
+						poly += subLevel[1].numberPure;
+						divisionResult = poly2 / poly;
+					}
+					else if(currentType & FARG_TYPE_POLY_NOFACT)
+						divisionResult = poly / subLevel[1].polynomeFact.expand();
+					else
+						divisionResult = poly / subLevel[1].polynomePure;
+				}
+				else
+				{
+					poly2 = subLevel[0].polynomePure;
+					
+					if(currentType & FARG_TYPE_NUMBER)
+					{
+						poly += subLevel[1].numberPure;
+						divisionResult = poly2 / poly;
+					}
+					else if(currentType & FARG_TYPE_POLY_NOFACT)
+						divisionResult = poly / subLevel[1].polynomeFact.expand();
+					else
+						divisionResult = poly / subLevel[1].polynomePure;
+				}
+
+			}
+			
+			break;
+		}
+	
 		default:
 		{
 			return;

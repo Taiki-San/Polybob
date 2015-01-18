@@ -30,8 +30,8 @@ enum
 	FCODE_EVALUATE		= 2,
 	FCODE_INTERPOLATE	= 3,
 	FCODE_COMPOSITION	= 4,
-	FCODE_TEST			= 5,
-	FCODE_DUMP			= 6,
+	FCODE_DIVISION		= 5,
+	MAX_FUNC_ID			= FCODE_DIVISION,
 	INVALID_FUNCTION_ID = UINT_MAX
 } FUNCTION_CODES;
 
@@ -43,6 +43,7 @@ enum
 	FARG_TYPE_REAL			= 1 << 2,
 	FARG_TYPE_COMPLEX		= 1 << 3,
 	FARG_TYPE_NUMBER		= FARG_TYPE_REAL | FARG_TYPE_COMPLEX,
+	FARG_TYPE_ANY			= FARG_TYPE_POLY | FARG_TYPE_NUMBER,
 	FARG_TYPE_DIV_RESULT	= 1 << 4
 };
 
@@ -69,7 +70,7 @@ class Entity
 
 	uint functionCode;
 	
-	void migrateType(uint8_t newType, Polynomial & finalPoly, PolynomialFact & finalFact, Complex::complexN & finalNumber);
+	void migrateType(uint8_t newType, Polynomial & finalPoly, PolyFact & finalFact, Complex::complexN & finalNumber);
 	bool checkArgumentConsistency() const;
 	
 public:
@@ -81,7 +82,7 @@ public:
 	//Mature
 	uint8_t matureType;
 	Polynomial polynomePure;
-	PolynomialFact polynomeFact;
+	PolyFact polynomeFact;
 	Complex::complexN numberPure;
 	divResult divisionResult;
 
@@ -121,7 +122,7 @@ public:
 typedef struct variableContainer
 {
 	Polynomial polynomial;
-	PolynomialFact polynomialFact;
+	PolyFact PolyFact;
 	Complex::complexN number;
 	
 	uint8_t type;
@@ -175,8 +176,8 @@ public:
 #pragma mark Parser core
 
 Entity _parserCore(std::string input, int opType);
-Entity _parseEntity(std::string level, bool canDiv);
-std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, bool canDiv);
+Entity _parseEntity(std::string level);
+std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions);
 Entity parseMonome(std::string str);
 
 #pragma mark Parser utils

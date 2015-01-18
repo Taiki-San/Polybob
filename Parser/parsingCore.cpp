@@ -28,13 +28,13 @@ Entity _parserCore(std::string input, int opType)
 		else
 		{
 			input.erase(0, 1);	//We remove the second =
-			auxiliary = _parseEntity(part1, true);
+			auxiliary = _parseEntity(part1);
 			
 			auxiliary.maturation();
 		}
 	}
 	
-	output = _parseEntity(input, opType == TYPE_OP_CALCUL);
+	output = _parseEntity(input);
 	output.maturation();
 		
 	if(opType == TYPE_OP_ALLOC)
@@ -46,7 +46,7 @@ Entity _parserCore(std::string input, int opType)
 			content.number = output.numberPure;
 		
 		else if(content.type & FARG_TYPE_FACTORISED)
-			content.polynomialFact = output.polynomeFact;
+			content.PolyFact = output.polynomeFact;
 		
 		else
 			content.polynomial = output.polynomePure;
@@ -83,7 +83,7 @@ Entity _parserCore(std::string input, int opType)
 	return output;
 }
 
-Entity _parseEntity(std::string level, bool canDiv)
+Entity _parseEntity(std::string level)
 {
 	Entity output;
 	std::vector<uint> positions;
@@ -91,7 +91,7 @@ Entity _parseEntity(std::string level, bool canDiv)
 	
 	if(havePlusOnLevel(level, positions) || haveMultOnLevel(level, positions))
 	{
-		std::vector<Entity> parsedLevel = _parseLevel(level, positions, canDiv);
+		std::vector<Entity> parsedLevel = _parseLevel(level, positions);
 		output.setSublevel(parsedLevel);
 	}
 	else if(isFunction(level, functionCode))
@@ -118,10 +118,10 @@ Entity _parseEntity(std::string level, bool canDiv)
 				throw std::invalid_argument(error.str());
 			}
 			else if(nbArg == 1)
-				output = _parseEntity(argument, false);
+				output = _parseEntity(argument);
 			else
 			{
-				std::vector<Entity> subLevel = _parseLevel(argument, positions, false);
+				std::vector<Entity> subLevel = _parseLevel(argument, positions);
 				output.setSublevel(subLevel);
 			}
 
@@ -140,7 +140,7 @@ Entity _parseEntity(std::string level, bool canDiv)
 	return output;
 }
 
-std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, bool canDiv)
+std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions)
 {
 	std::vector<Entity> output;
 	
@@ -163,7 +163,7 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 			break;
 		}
 		
-		entity = _parseEntity(level.substr(basePos, *current - basePos), false);
+		entity = _parseEntity(level.substr(basePos, *current - basePos));
 
 		if(basePos <= 1)
 			entity.previousOperator = OP_NONE;
@@ -182,22 +182,6 @@ std::vector<Entity> _parseLevel(std::string level, std::vector<uint> positions, 
 				{
 					std::stringstream error;
 					error << "Invalid power: " << level.substr(basePos, *current) << " ~ " << *current;
-					throw std::invalid_argument(error.str());
-					break;
-				}
-			}
-			else if(entity.previousOperator == OP_DIV)
-			{
-				//Division is a pretty special cas, and can't be used except on the highest level
-				if(canDiv)
-				{
-					canDiv = false;
-					doesDiv = true;
-				}
-				else
-				{
-					std::stringstream error;
-					error << "Invalid division, because of the specifications, it can only be used when directly outputed";
 					throw std::invalid_argument(error.str());
 					break;
 				}
