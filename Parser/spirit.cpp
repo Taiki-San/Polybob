@@ -30,10 +30,11 @@ struct grammar : qi::grammar<Iterator, internalMonome(), ascii::space_type>
 		exponent = char_("z") >> ((char_("^") >> qi::uint_[_val = qi::_1]) | eps[_val = 1]);
 		
 		//Will parse a single component
-		variable = -char_("i")
+		variable = char_("i") | (-char_("i")
 		>> ((char_("{") >> (+(ascii::char_ - char_("}"))) >> char_("}"))
 			| (+char_("0-9") >> -(char_(".") >> +char_("0-9"))))
-		>> -char_("i");
+		>> -char_("i"));
+
 		
 		//Monome core
 		polynomial = eps[_val = internalMonome()]

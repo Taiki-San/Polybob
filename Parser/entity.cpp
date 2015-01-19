@@ -137,6 +137,11 @@ void Entity::print() const
 		std::cout << "Quotient: 	" << divisionResult.first.toString() << std::endl;
 		std::cout << "Remaining:	" << divisionResult.second.toString();
 	}
+	else if(matureType & FARG_TYPE_EXT_RESULT)
+	{
+		std::cout << "Partie réelle: 		" << divisionResult.first.toString() << std::endl;
+		std::cout << "Partie imaginaire:	" << divisionResult.second.toString();
+	}
 	else
 	{
 		std::cout << " => ";
@@ -170,10 +175,22 @@ void Entity::printMonome() const
 		std::cout << numberPure.real();
 	
 	else if(numberPure.real() == 0)
-		std::cout << numberPure.imag() << 'i';
+	{
+		if(numberPure.imag() > 1)
+			std::cout << numberPure.imag() << 'i';
+		else
+			std::cout << 'i';
+	}
 	
 	else
-		std::cout << '(' << numberPure.real() << '+' << numberPure.imag() << "i)";
+	{
+		std::cout << '(' << numberPure.real() << '+';
+		
+		if(numberPure.imag() > 1)
+			std::cout << numberPure.imag();
+
+		std::cout << "i)";
+	}
 	
 	std::cout << ' ';
 }
@@ -413,6 +430,12 @@ void Entity::maturation(short threadID)
 				error << "You can't reuse the output of an euclidian division";
 				throw std::invalid_argument(error.str());
 			}
+			else if(currentType & FARG_TYPE_EXT_RESULT)
+			{
+				std::stringstream error;
+				error << "You can't reuse the output of an extraction";
+				throw std::invalid_argument(error.str());
+			}
 			
 			else
 			{
@@ -422,7 +445,7 @@ void Entity::maturation(short threadID)
 		else
 			finalNumber += 1;
 		
-		for(++iter; iter != subLevel.end() && currentType != FARG_TYPE_DIV_RESULT; ++iter)
+		for(++iter; iter != subLevel.end() && (currentType & FARG_TYPE_UNUSABLE) == 0; ++iter)
 		{
 			currentType = iter->matureType;
 			currentPower = iter->power;
@@ -432,6 +455,12 @@ void Entity::maturation(short threadID)
 			{
 				std::stringstream error;
 				error << "You can't reuse the output of an euclidian division";
+				throw std::invalid_argument(error.str());
+			}
+			else if(currentType & FARG_TYPE_EXT_RESULT)
+			{
+				std::stringstream error;
+				error << "You can't reuse the output of an extraction";
 				throw std::invalid_argument(error.str());
 			}
 			
@@ -613,7 +642,7 @@ void Entity::migrateType(uint8_t newType, Polynomial & finalPoly, PolyFact & fin
 		if(matureType & FARG_TYPE_NUMBER)
 			finalPoly += finalNumber;
 		else
-			finalPoly += finalFact.expand();
+			finalPoly = finalFact.expand();
 	}
 	
 	if(matureType & FARG_TYPE_NUMBER)
@@ -820,6 +849,70 @@ void Entity::executeFunction()
 			}
 			
 			break;
+		}
+			
+		case FCODE_DEGREE:
+		{
+			uint argPower = subLevel[0].power;
+			
+			numberPure = (subLevel[0].matureType & FARG_TYPE_FACTORISED) ? (subLevel[0].polynomeFact ^ argPower).expand().getDegree() : (subLevel[0].polynomePure ^ argPower).getDegree();
+			break;
+		}
+			
+		case FCODE_DERIVATIVE:
+		{
+			uint argPower = subLevel[0].power;
+			
+			polynomePure = (subLevel[0].matureType & FARG_TYPE_FACTORISED) ? (subLevel[0].polynomeFact ^ argPower).derivative() : (subLevel[0].polynomePure ^ argPower).derivative();
+			break;
+		}
+			
+		case FCODE_INTEGRAL:
+		{
+			uint argPower = subLevel[0].power;
+			
+			polynomePure = (subLevel[0].matureType & FARG_TYPE_FACTORISED) ? (subLevel[0].polynomeFact ^ argPower).integral() : (subLevel[0].polynomePure ^ argPower).integral();
+			break;
+		}
+			
+		case FCODE_GCD:
+		{
+			uint arg2Power = subLevel[1].power;
+
+			if(subLevel[0].matureType & FARG_TYPE_FACTORISED)
+			{
+				if(subLevel[1].matureType & FARG_TYPE_FACTORISED)
+					polynomePure = (subLevel[0].polynomeFact ^ argPower).gcd((subLevel[1].polynomeFact ^ arg2Power).expand());
+				else
+					polynomePure = (subLevel[0].polynomeFact ^ argPower).gcd(subLevel[1].polynomePure ^ arg2Power);
+			}
+			else
+			{
+				if(subLevel[1].matureType & FARG_TYPE_FACTORISED)
+					polynomePure = (subLevel[0].polynomePure ^ argPower).gcd((subLevel[1].polynomeFact ^ arg2Power).expand());
+				else
+					polynomePure = (subLevel[0].polynomePure ^ argPower).gcd(subLevel[1].polynomePure ^ arg2Power);
+			}
+			break;
+		}
+			
+		case FCODE_EXTRACTION:
+		{
+			uint argPower = subLevel[0].power;
+
+			divisionResult = (subLevel[0].matureType & FARG_TYPE_FACTORISED) ? (subLevel[0].polynomeFact ^ argPower).complexExtraction() : (subLevel[0].polynomePure ^ argPower).complexExtraction();
+			break;
+		}
+			
+		case FCODE_CONJUGAISON:
+		{
+			uint argPower = subLevel[0].power;
+			retType = subLevel[0].matureType;
+			
+			if(subLevel[0].matureType & FARG_TYPE_FACTORISED)
+				polynomeFact = (subLevel[0].polynomeFact ^ argPower).conjugate();
+			else
+				polynomePure = (subLevel[0].polynomePure ^ argPower).conjugate();
 		}
 	
 		default:

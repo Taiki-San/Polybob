@@ -5,7 +5,7 @@ VARIABLE convertSpirit(std::string string)
 	VARIABLE variable;
 	
 	size_t size = string.size();
-	double value;
+	double value = 1;
 	char haveI = 0;
 	bool isComplex;
 	
@@ -25,14 +25,14 @@ VARIABLE convertSpirit(std::string string)
 		size--;
 	}
 
-	if(string.at(size-1) == 'i')
+	if(size > 0 && string.at(size-1) == 'i')
 	{
 		haveI++;
 		string.erase(size-1, 1);
 		size--;
 	}
 
-	if(string.at(0) == '{')
+	if(size > 0 && string.at(0) == '{')
 	{
 		if(string.at(string.size() - 1) != '}')
 		{
@@ -66,7 +66,7 @@ VARIABLE convertSpirit(std::string string)
 			return variable;
 		}
 	}
-	else
+	else if(size > 0)
 		value = atof(string.c_str());
 
 	if(haveI == 1)
