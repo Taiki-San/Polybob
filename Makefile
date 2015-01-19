@@ -10,7 +10,7 @@ all:
 	$(MAKE) -C Parser
 	$(MAKE) -C Maths
 
-	$(CC) $(BASE_FLAGS) -O2 -c entrypoint.c -o obj/entrypoint.o
+	$(CC) $(BASE_FLAGS) -O2 -c entrypoint.cpp -o obj/entrypoint.o
 	gcc $(BASE_FLAGS) -O2 -c Libraries/linenoise.c -o obj/linenoise.o
 
 	$(CC) $(LINK_FLAGS) obj/* -o PolyBob

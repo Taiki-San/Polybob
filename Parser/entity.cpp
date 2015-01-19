@@ -184,13 +184,14 @@ void Entity::printMonome() const
 
 //MT support
 static unsigned char runningThreads;
+unsigned char argument[3] = {1, 2, 3};
 static size_t cut[4];
 static Entity * _mainEntity;
 
 static bool error;
 static std::string errorMessage;
 
-void maturationWrapper(unsigned * currentThread)
+void maturationWrapper(unsigned char * currentThread)
 {
 	_mainEntity->maturation(*currentThread);
 }
@@ -206,8 +207,8 @@ void Entity::maturation(short threadID)
 		//Yay, multi-threading
 		if(threadID == 0)
 		{
+			runningThreads = 0;
 			size_t length = subLevel.size(), count = 0;
-			unsigned char argument[3] = {1, 2, 3};
 			bool worthIt = false;
 			
 			for(std::vector<Entity>::iterator iter = subLevel.begin(); iter != subLevel.end(); ++iter)
@@ -243,7 +244,7 @@ void Entity::maturation(short threadID)
 				for(uint i = 1; i < length; i++)
 				{
 					cut[i] = i + 1;
-					createNewThread((void*) maturationWrapper, &argument[i-1]);
+					createNewThread((void*) maturationWrapper, &(argument[i-1]));
 				}
 			}
 			//Otherwise, we dispatch the load, with most of it on the main thread
@@ -256,11 +257,12 @@ void Entity::maturation(short threadID)
 				for(uint i = 1; i < length; i++)
 				{
 					cut[i] = cut[i - 1] + part;
-					createNewThread((void*) maturationWrapper, &argument[i-1]);
+					createNewThread((void*) maturationWrapper, &(argument[i-1]));
 				}
 			}
 			
 			//We mature until our entry
+			count = 0;
 			for(std::vector<Entity>::iterator iter = subLevel.begin(); !error && iter != subLevel.end() && count < cut[0]; ++iter, ++count)
 				iter->maturation(-1);
 			

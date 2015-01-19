@@ -17,5 +17,5 @@ clever:
 	$(CC) $(FLAGS) -c -o ../obj/parsingCore.o parsingCore.cpp
 	$(CC) $(FLAGS) -c -o ../obj/sanitization.o sanitization.cpp
 	$(CC) $(FLAGS) -c -o ../obj/spirit.o spirit.cpp
-	$(CC) $(FLAGS) -c -o ../obj/thread.o thread.c
+	$(CC) $(FLAGS) -c -o ../obj/thread.o thread.cpp
 	$(CC) $(FLAGS) -c -o ../obj/toolbox.o toolbox.cpp
