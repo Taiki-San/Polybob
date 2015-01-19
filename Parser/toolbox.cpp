@@ -97,8 +97,8 @@ VARIABLE convertSpirit(std::string string)
 bool havePlusOnLevel(std::string level, std::vector<uint> & positions)
 {
 	bool inBlock = false, haveFoundSomething = false;
-	char exitChar = 0, currentChar, previousChar = 0;
-	uint index = 0;
+	char startChar = 0, exitChar = 0, currentChar, previousChar = 0;
+	uint index = 0, depth = 0;
 	
 	for(std::string::const_iterator currentCharIt = level.begin(); currentCharIt != level.end(); ++currentCharIt, index++)
 	{
@@ -106,10 +106,15 @@ bool havePlusOnLevel(std::string level, std::vector<uint> & positions)
 		
 		if(inBlock)
 		{
-			if(currentChar != exitChar)
-				continue;
-			else
-				inBlock = false;
+			if(currentChar == exitChar)
+			{
+				if(depth > 0)
+					depth--;
+				else
+					inBlock = false;
+			}
+			else if(currentChar == startChar)
+				depth++;
 		}
 		else if(currentChar == '+' || currentChar == '-' || (currentChar == '^' && previousChar != 'x'))
 		{
@@ -121,16 +126,19 @@ bool havePlusOnLevel(std::string level, std::vector<uint> & positions)
 		else if(currentChar == '(')
 		{
 			inBlock = true;
+			startChar = currentChar;
 			exitChar = ')';
 		}
 		else if(currentChar == '[')
 		{
 			inBlock = true;
+			startChar = currentChar;
 			exitChar = ']';
 		}
 		else if(currentChar == '{')
 		{
 			inBlock = true;
+			startChar = currentChar;
 			exitChar = '}';
 		}
 
@@ -145,9 +153,9 @@ bool havePlusOnLevel(std::string level, std::vector<uint> & positions)
 
 bool haveMultOnLevel(std::string level, std::vector<uint> & positions)
 {
-	bool inBlock = false, haveFoundSomething = false, indexedLastRun = false;
-	char exitChar = 0, currentChar, previousChar = 0;
-	uint index = 0;
+	bool inBlock = false, validBlock = true, haveFoundSomething = false, indexedLastRun = false;
+	char startChar = 0, exitChar = 0, currentChar, previousChar = 0;
+	uint index = 0, depth = 0;
 	
 	for(std::string::const_iterator currentCharIt = level.begin(); currentCharIt != level.end(); ++currentCharIt, index++)
 	{
@@ -156,17 +164,29 @@ bool haveMultOnLevel(std::string level, std::vector<uint> & positions)
 		
 		if(inBlock)
 		{
-			if(currentChar != exitChar)
-				continue;
-			else
+			if(currentChar == exitChar)
 			{
-				inBlock = false;
-				if(exitChar == ')')		//The equation may end with this, and if so, we don't want to add an other marker afterward
+				if(depth > 0)
+					depth--;
+
+				else if(exitChar == ')')		//The equation may end with this, and if so, we don't want to add an other marker afterward
 				{
-					haveFoundSomething = true;
-					indexedLastRun = true;
-					positions.push_back(index);
+					inBlock = false;
+					if(validBlock)
+					{
+						haveFoundSomething = true;
+						indexedLastRun = true;
+						positions.push_back(index);
+					}
+					else
+						validBlock = true;
 				}
+				else
+					inBlock = false;
+			}
+			else if(currentChar == startChar)
+			{
+				depth++;
 			}
 		}
 		else if(currentChar == '*' || currentChar == '/')
@@ -182,20 +202,30 @@ bool haveMultOnLevel(std::string level, std::vector<uint> & positions)
 		else if(currentChar == '(')
 		{
 			inBlock = true;
+			startChar = '(';
 			exitChar = ')';
-			haveFoundSomething = true;
-			positions.push_back(index);
+			
+			if(previousChar != '+' && previousChar != '-')
+			{
+				validBlock = true;
+				haveFoundSomething = true;
+				positions.push_back(index);
+			}
+			else
+				validBlock = false;
 		}
 		
 		//Ignored blocks
 		else if(currentChar == '[')
 		{
 			inBlock = true;
+			startChar = '[';
 			exitChar = ']';
 		}
 		else if(currentChar == '{')
 		{
 			inBlock = true;
+			startChar = '{';
 			exitChar = '}';
 		}
 		

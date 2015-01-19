@@ -60,7 +60,7 @@ void checkString(std::string input)
 					if(--parenthesisCount < 0)
 						inconsistency = true;
 
-					else if(last != 0)
+					else if(last != 0 && last != ')' && last != '}' && last != ']')
 						inconsistency = true;
 
 					else
