@@ -5,7 +5,8 @@ BASE_FLAGS  =  -Wall -O2
 LINK_FLAGS = -pthread
 
 all:
-	rm -rf obj/*
+	rm -rf obj
+	mkdir obj
 	$(MAKE) -C CLI
 	$(MAKE) -C Parser
 	$(MAKE) -C Maths

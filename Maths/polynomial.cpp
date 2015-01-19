@@ -295,7 +295,7 @@ Polynomial operator^(Polynomial lhs, const unsigned int &rhs)
     return (lhs ^= rhs);
 }
 
-/*[0]	Monomial
+/*
  * Division
  */
 
@@ -309,17 +309,17 @@ std::pair<Polynomial, Polynomial> operator/(Polynomial lhs, const Polynomial &rh
     Polynomial q;
     Polynomial r(lhs);
     Polynomial t;
-	unsigned int previousDegree;
+    unsigned int previousDegree;
 
     while(!r.isNull() && (previousDegree = r.getDegree()) >= rhs.getDegree())
     {
         t = (r.getHighestMonomial() / rhs.getHighestMonomial());
         q += t;
         r -= (t * rhs);
-		
-		//Double precision is messing with us, yay
-		if(previousDegree == r.getDegree())
-			r -= r.getHighestMonomial();
+
+        //Double precision is messing with us, yay
+        if(previousDegree == r.getDegree())
+            r -= r.getHighestMonomial();
     }
 
     return std::pair<Polynomial, Polynomial>(q, r);
@@ -401,11 +401,14 @@ Polynomial& Polynomial::operator+=(const Complex::complexN &rhs)
         return *this;
     }
 
-    Monomial &first = listMonomials.front();
+    listMonomials_t::iterator first = listMonomials.begin();
 
-    if(first.power == 0)
+    if(first->power == 0)
     {
-        first.coeff += rhs;
+        first->coeff += rhs;
+
+        if(isZeroMonomial()(*first))
+            listMonomials.erase(first);
     }
     else
     {
