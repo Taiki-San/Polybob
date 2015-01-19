@@ -648,11 +648,15 @@ Complex::complexN Polynomial::evaluation(const Complex::complexN &value) const
     Complex::complexN result = iter->coeff;
     ++iter;
 
-    while(iter != listMonomials.rend())
+    for(unsigned int i = this->getDegree() ; i-- != 0 ;)
     {
         result *= value;
-        result += iter->coeff;
-        ++iter;
+
+        if(i == iter->power)
+        {
+            result += iter->coeff;
+            ++iter;
+        }
     }
 
     return result;
