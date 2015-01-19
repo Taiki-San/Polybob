@@ -816,7 +816,7 @@ void Entity::executeFunction()
 					else
 						divisionResult = poly / subLevel[1].polynomeFact.expand();
 				}
-				else if(matureType & FARG_TYPE_FACTORISED)
+				else if(subLevel[0].matureType & FARG_TYPE_FACTORISED)
 				{
 					poly2 = subLevel[0].polynomeFact.expand();
 					
