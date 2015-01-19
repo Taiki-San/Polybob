@@ -77,6 +77,7 @@ public:
     Complex::complexN evaluation(const Complex::complexN &value) const;
 
     std::pair<Polynomial, Polynomial> complexExtraction() const;
+    Polynomial conjugate() const;
 
     vectorRoots_t getRoots() const;
 

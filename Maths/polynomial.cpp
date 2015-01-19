@@ -295,7 +295,7 @@ Polynomial operator^(Polynomial lhs, const unsigned int &rhs)
     return (lhs ^= rhs);
 }
 
-/*
+/*[0]	Monomial
  * Division
  */
 
@@ -309,12 +309,17 @@ std::pair<Polynomial, Polynomial> operator/(Polynomial lhs, const Polynomial &rh
     Polynomial q;
     Polynomial r(lhs);
     Polynomial t;
+	unsigned int previousDegree;
 
-    while(!r.isNull() && r.getDegree() >= rhs.getDegree())
+    while(!r.isNull() && (previousDegree = r.getDegree()) >= rhs.getDegree())
     {
         t = (r.getHighestMonomial() / rhs.getHighestMonomial());
         q += t;
         r -= (t * rhs);
+		
+		//Double precision is messing with us, yay
+		if(previousDegree == r.getDegree())
+			r -= r.getHighestMonomial();
     }
 
     return std::pair<Polynomial, Polynomial>(q, r);
@@ -393,6 +398,7 @@ Polynomial& Polynomial::operator+=(const Complex::complexN &rhs)
     if(this->isNull())
     {
         listMonomials.push_back(Monomial(rhs, 0));
+        return *this;
     }
 
     Monomial &first = listMonomials.front();
@@ -615,6 +621,11 @@ Polynomial Polynomial::integral() const
 
 Polynomial Polynomial::gcd(Polynomial b) const
 {
+    if(*this == b)
+    {
+        return *this;
+    }
+
     Polynomial a(*this);
     Polynomial c;
 
@@ -687,6 +698,24 @@ std::pair<Polynomial, Polynomial> Polynomial::complexExtraction() const
     }
 
     return std::pair<Polynomial, Polynomial>(real, imag);
+}
+
+Polynomial Polynomial::conjugate() const
+{
+    if(this->isNull())
+        return *this;
+
+    Polynomial a(*this);
+
+    for(listMonomials_t::iterator iter = a.listMonomials.begin() ; iter != a.listMonomials.end() ; ++iter)
+    {
+        if(iter->coeff.imag() != 0)
+        {
+            iter->coeff = std::conj(iter->coeff);
+        }
+    }
+
+    return a;
 }
 
 vectorRoots_t Polynomial::getRoots() const

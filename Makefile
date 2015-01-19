@@ -1,8 +1,8 @@
 CC = g++
 
-BASE_FLAGS  =  -Wall -g
+BASE_FLAGS  =  -Wall -O2 -m32
 
-LINK_FLAGS = -pthread
+LINK_FLAGS = -pthread -m32
 
 all:
 	rm -rf obj/*
