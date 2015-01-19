@@ -1,6 +1,6 @@
 CC = g++
 
-BASE_FLAGS  =  -Wall -O2 -m32
+BASE_FLAGS  =  -Wall -O2
 
 FLAGS = $(BASE_FLAGS)
 

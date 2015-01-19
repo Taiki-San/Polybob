@@ -1,6 +1,6 @@
 CC = g++
 
-BASE_FLAGS  = -fpermissive -std=gnu++11 -O2 -m32
+BASE_FLAGS  = -fpermissive -std=gnu++11 -O2
 
 # INCLUDE BASE DIRECTORY AND BOOST DIRECTORY FOR HEADERS
 LDFLAGS = -I../Libraries/

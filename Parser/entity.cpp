@@ -586,9 +586,9 @@ void Entity::maturation(short threadID)
 						if(matureType & FARG_TYPE_NUMBER)
 							finalNumber *= currentNumber;
 						else if(matureType & FARG_TYPE_FACTORISED)
-							finalFact *= currentFact;
+							finalFact *= currentNumber;
 						else
-							finalPoly *= currentPoly;
+							finalPoly *= currentNumber;
 					}
 					
 					else
