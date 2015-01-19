@@ -31,12 +31,18 @@ Entity _parserCore(std::string input, int opType)
 			auxiliary = _parseEntity(part1);
 			
 			auxiliary.maturation(0);
+			
+			if(auxiliary.matureType & FARG_TYPE_FACTORISED)
+				auxiliary.polynomeFact.simplify();
 		}
 	}
 	
 	output = _parseEntity(input);
 	output.maturation(0);
-		
+
+	if(output.matureType & FARG_TYPE_FACTORISED)
+		output.polynomeFact.simplify();
+	
 	if(opType == TYPE_OP_ALLOC)
 	{
 		addEntityToVar(receiver, output);

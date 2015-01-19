@@ -480,8 +480,7 @@ void Entity::maturation(short threadID)
 			
 			else if(currentType & FARG_TYPE_FACTORISED)
 			{
-				//Factorized form already consider the power
-				currentFact = iter->polynomeFact;
+				currentFact = iter->polynomeFact ^ currentPower;
 			}
 			
 			else
