@@ -41,14 +41,20 @@ void parseCommand(const char *command)
 		printf("Un certain nombre de fonctions sont supportés, vous pouvez les appeler de la manière suivante:\n");
 		printf("nomDeLaFonction[argument1, argument2]\n\n");
 		printf("Liste des fonctions:\n");
-		printf("	- expand 	 : développe un polynôme\n");
-		printf("	- factor 	 : factorise un polynôme\n");
-		printf("	- evaluate 	 : évalue un polynome pour une valeur\n");
-//		printf("	- interpolate	 : calcul un polynôme passant par les valeurs réelles données\n");
-		printf("	- composition	 : compose deux polynômes\n");
-		printf("	- division	 : réalise la division euclidienne de deux polynômes\n");
-		printf("			   Attention: / ne réalise pas une division euclidienne\n\n");
-		printf("Nous espérons que Polybob pourra vous satisfaire.\n");
+		printf("	- expand 	 	: développe un polynôme\n");
+		printf("	- factor 	 	: factorise un polynôme\n");
+		printf("	- evaluate 	 	: évalue un polynome pour une valeur\n");
+//		printf("	- interpolate		 : calcul un polynôme passant par les valeurs réelles données\n");
+		printf("	- composition		: compose deux polynômes\n");
+		printf("	- division	 	: réalise la division euclidienne de deux polynômes\n");
+		printf("			  	 	Attention: / ne réalise pas une division euclidienne\n");
+		printf("	- degree 	 	: donne le degré du polynôme\n");
+		printf("	- derivative		: dérive deux polynômes\n");
+		printf("	- integral 	 	: intègre deux polynômes\n");
+		printf("	- gcd	 	 	: donne le plus grand diviseur commun de deux polynômes\n");
+		printf("	- complexExtraction	: sépare la partie complexe et la partie réelle d'un polynôme\n");
+		printf("	- conjugate 	 	: conjugue un polynôme\n");
+		printf("\nNous espérons que Polybob pourra vous satisfaire.\n");
 	}
 	else if(!strncmp(command,"historylen",10))
 	{
