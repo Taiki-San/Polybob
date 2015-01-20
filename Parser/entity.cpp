@@ -724,14 +724,7 @@ void Entity::executeFunction()
 			
 		case FCODE_FACTOR:
 		{
-#if 0
-			if(subLevel[0].matureType & FARG_TYPE_FACTORISED)
-				polynomeFact = (subLevel[0].polynomeFact ^ argPower).factor();
-			else
-				polynomeFact = (subLevel[0].polynomePure ^ argPower).factor();
-#else
-			throw std::invalid_argument("Sorry, not implemented yet :/");
-#endif
+			polynomeFact = (subLevel[0].polynomePure ^ argPower).factor();
 			break;
 		}
 			

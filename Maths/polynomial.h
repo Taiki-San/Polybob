@@ -15,6 +15,8 @@
 #include "../Maths/monomial.h"
 #include "../Maths/factor.h"
 
+class PolyFact;
+
 typedef std::vector<Monomial> vectorMonomials_t;
 typedef std::list<Monomial> listMonomials_t;
 typedef std::vector<Complex::complexN> vectorRoots_t;
@@ -80,6 +82,7 @@ public:
     Polynomial conjugate() const;
 
     vectorRoots_t getRoots() const;
+    PolyFact factor() const;
 
 private:
     listMonomials_t listMonomials;

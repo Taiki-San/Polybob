@@ -1,4 +1,5 @@
 #include "polynomial.h"
+#include "polyfact.h"
 
 //TODO: Voir si il vaut mieux créer une méthode pour rendre le polynôme nul
 //ou si il vaut mieux garder la méthode actuel : *this = Polynomial()
@@ -744,13 +745,13 @@ vectorRoots_t Polynomial::getRoots() const
     {
         bound += std::abs(iter->coeff);
 
-        std::cout << "B: " << bound << std::endl;
+        //std::cout << "B: " << bound << std::endl;
     }
 
     bound *= (1.0 / std::abs(iter->coeff));
     bound = std::max(1.0, bound);
 
-    std::cout << "Bound: " << bound << std::endl;
+    //std::cout << "Bound: " << bound << std::endl;
 
     //On utilise la borne pour générer un jeu de racines aléatoires
     vectorRoots_t roots;
@@ -761,7 +762,7 @@ vectorRoots_t Polynomial::getRoots() const
         for(size_t i = 0 ; i < degree ; ++i)
         {
             roots.push_back(Complex::pickRandomBoundedComplex(bound));
-            std::cout << "Rand roots: " << roots[i] << std::endl;
+            //std::cout << "Rand roots: " << roots[i] << std::endl;
         }
 
         //On supprime les doubles (il faut que le jeu de racines initial soit
@@ -774,8 +775,12 @@ vectorRoots_t Polynomial::getRoots() const
     const Polynomial derivate(this->derivative());
     vectorRoots_t offset(degree);
 
-    for(size_t LOL = 0 ; LOL < 200 ; ++LOL)
+    double convergence = 10;
+
+    for(size_t iter = 0 ; iter < 50 && convergence != 0.0 ; ++iter)
     {
+        convergence = 0;
+
         for(size_t k = 0 ; k < degree ; ++k)
         {
             Complex::complexN inverseSum(0, 0);
@@ -791,11 +796,29 @@ vectorRoots_t Polynomial::getRoots() const
             //std::cout << "Diff:" << diff << std::endl;
 
             offset[k] = -(diff / (Complex::complexN(1, 0) - (diff * inverseSum)));
-            std::cout << "Offset " << k << ":" << offset[k] << std::endl;
+            convergence += std::abs(offset[k]);
+            //std::cout << "Offset " << k << ":" << offset[k] << std::endl;
             roots[k] += offset[k];
-            std::cout << "Root " << k << ":" << roots[k] << std::endl;
+            //std::cout << "Root " << k << ":" << roots[k] << std::endl;
         }
+
+        //std::cout << "Convergence: " << convergence << std::endl;
     }
 
-    return vectorRoots_t();
+    return roots;
+}
+
+PolyFact Polynomial::factor() const
+{
+    vectorRoots_t roots = this->getRoots();
+
+    vectorFactors_t factors;
+    factors.reserve(roots.size());
+
+    for(vectorRoots_t::const_iterator iter = roots.begin() ; iter != roots.end() ; ++iter)
+    {
+        factors.push_back(Factor(*iter, 1));
+    }
+
+    return PolyFact(factors, this->getHighestMonomial().coeff);
 }
