@@ -1,12 +1,4 @@
-CC = g++
-
-BASE_FLAGS  =  -Wall -O2
-
-FLAGS = $(BASE_FLAGS)
-
-all: main
-
-main:
-	$(CC) $(FLAGS) -c -o ../obj/interface_cli.o interface.cpp
-	$(CC) $(FLAGS) -c -o ../obj/easter.o fluffle.cpp
-	$(CC) $(FLAGS) -c -o ../obj/wrapper.o wrapper.cpp
+all:
+	$(CC) $(FLAGS) -o ../obj/interface_cli.o interface.cpp
+	$(CC) $(FLAGS) -o ../obj/easter.o fluffle.cpp
+	$(CC) $(FLAGS) -o ../obj/wrapper.o wrapper.cpp
