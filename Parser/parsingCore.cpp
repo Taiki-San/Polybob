@@ -67,10 +67,10 @@ Entity _parserCore(std::string input, int opType)
 		}
 		
 		if(equal)
-			std::cout << "Those equations are equal\n";
+			std::cout << "Those expressions are equal\n";
 		
 		else
-			std::cout << "Those equations are not equal\n";
+			std::cout << "Those expressions are not equal\n";
 	}
 	else if(opType == TYPE_OP_CALCUL)
 	{
@@ -112,7 +112,7 @@ Entity _parseEntity(std::string level)
 	{
 		//We extract the function argument, then evaluate the expression
 		
-		size_t start = level.find('[') + 1, length = level.find(']') - start;
+		size_t start = level.find('[') + 1, length = level.find_last_of(']') - start;
 		if(length > 0)
 		{
 			size_t nbArg, expected = Catalog::getNbArgsForID(functionCode);
@@ -135,7 +135,8 @@ Entity _parseEntity(std::string level)
 			else if(nbArg == 1)
 			{
 				Entity subElem = _parseEntity(argument);
-				subElem.functionArg = true;
+				
+				subElem.functionArg = subElem.wasVar;
 				subLevel.push_back(subElem);
 			}
 			else

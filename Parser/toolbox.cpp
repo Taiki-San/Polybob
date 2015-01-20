@@ -4,6 +4,8 @@ VARIABLE convertSpirit(std::string string)
 {
 	VARIABLE variable;
 	
+	variable.isVar = false;
+	
 	size_t size = string.size();
 	double value = 1;
 	char haveI = 0;
@@ -62,6 +64,8 @@ VARIABLE convertSpirit(std::string string)
 				else
 					variable.polynomial *= complex;
 			}
+			
+			variable.isVar = true;
 			
 			return variable;
 		}
@@ -194,7 +198,7 @@ bool haveMultOnLevel(std::string level, std::vector<uint> & positions)
 			haveFoundSomething = true;
 			positions.push_back(index);
 		}
-		else if(currentChar == '^' && previousChar != 'x')
+		else if(currentChar == '^' && previousChar != 'x' && previousChar != 'z')
 		{
 			haveFoundSomething = true;
 			positions.push_back(index);			
@@ -243,7 +247,8 @@ bool isFunction(std::string level, uint & functionCode)
 	//Not finishing as a function
 	if(level[level.length()-1] != ']')
 		return false;
-	
+
+#if 0
 	//Containing several function
 	size_t index = level.find(']');
 	
@@ -270,7 +275,9 @@ bool isFunction(std::string level, uint & functionCode)
 		//Okay, some dumbass named a variable with a ] inside, congrats...
 	}
 
-	index = level.find('[');
+#endif
+	
+	size_t index = level.find('[');
 	
 	level = level.substr(0, index);
 	

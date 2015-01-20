@@ -2,6 +2,7 @@
 
 Entity::Entity() : _monome(Complex::complexN(0, 0), 0)
 {
+	wasVar = false;
 	isMature = false;
 	initialized = false;
 	functionArg = false;
@@ -50,7 +51,7 @@ void Entity::updatePowerOfLast(int _power)
 		if(end.power + _power == 0)
 			end.resetToOne();
 		else
-			end.power = _power;
+			end.power *= _power;
 	}
 	else
 		power = _power;
@@ -165,29 +166,37 @@ void Entity::print() const
 
 void Entity::printMonome() const
 {
-	if(numberPure.real() == 0 && numberPure.imag() == 0)
+	Complex::complexN cpy = numberPure;
+	
+	if(cpy.real() > -1e-15 && cpy.real() < 1e-15)
+		cpy.real(0);
+	
+	if(cpy.imag() < 1e-15 && cpy.imag() > -1e-15)
+		cpy.imag(0);
+	
+	if(cpy.real() == 0 && cpy.imag() == 0)
 	{
 		std::cout << '0';
 		return;
 	}
 	
-	else if(numberPure.imag() == 0)
-		std::cout << numberPure.real();
+	else if(cpy.imag() == 0)
+		std::cout << cpy.real();
 	
-	else if(numberPure.real() == 0)
+	else if(cpy.real() == 0)
 	{
-		if(numberPure.imag() > 1)
-			std::cout << numberPure.imag() << 'i';
+		if(cpy.imag() > 1)
+			std::cout << cpy.imag() << 'i';
 		else
 			std::cout << 'i';
 	}
 	
 	else
 	{
-		std::cout << '(' << numberPure.real() << '+';
+		std::cout << '(' << cpy.real() << '+';
 		
-		if(numberPure.imag() > 1)
-			std::cout << numberPure.imag();
+		if(cpy.imag() > 1)
+			std::cout << cpy.imag();
 
 		std::cout << "i)";
 	}
@@ -340,7 +349,7 @@ void Entity::maturation(short threadID)
 	if(isFunction)
 		executeFunction();
 	
-	else if(functionArg)
+	else if(functionArg && isContainer && subLevel.size() == 1)
 		return;
 
 	else if(!isContainer)
@@ -579,15 +588,22 @@ void Entity::maturation(short threadID)
 					//If one of them is a number, we'll have the type of the other
 					else if((matureType & FARG_TYPE_NUMBER) || (currentType & FARG_TYPE_NUMBER))
 					{
+						//The other one is a number
+						if(currentType & FARG_TYPE_FACTORISED)
+						{
+							currentPoly = currentFact.expand();
+							currentType = FARG_TYPE_POLY_NOFACT;
+						}
+						
 						if(matureType & FARG_TYPE_NUMBER)
 							migrateType(currentType, finalPoly, finalFact, finalNumber);
 						
 						if(matureType & FARG_TYPE_NUMBER)
 							finalNumber *= currentNumber;
 						else if(matureType & FARG_TYPE_FACTORISED)
-							finalFact *= currentNumber;
+							finalFact *= currentFact;
 						else
-							finalPoly *= currentNumber;
+							finalPoly *= currentPoly;
 					}
 					
 					else
@@ -855,7 +871,10 @@ void Entity::executeFunction()
 		{
 			uint argPower = subLevel[0].power;
 			
-			polynomePure = (subLevel[0].matureType & FARG_TYPE_FACTORISED) ? (subLevel[0].polynomeFact ^ argPower).derivative() : (subLevel[0].polynomePure ^ argPower).derivative();
+			if(subLevel[0].matureType & FARG_TYPE_NUMBER)
+				polynomePure = Polynomial();
+			else
+				polynomePure = (subLevel[0].matureType & FARG_TYPE_FACTORISED) ? (subLevel[0].polynomeFact ^ argPower).derivative() : (subLevel[0].polynomePure ^ argPower).derivative();
 			break;
 		}
 			
@@ -863,7 +882,19 @@ void Entity::executeFunction()
 		{
 			uint argPower = subLevel[0].power;
 			
-			polynomePure = (subLevel[0].matureType & FARG_TYPE_FACTORISED) ? (subLevel[0].polynomeFact ^ argPower).integral() : (subLevel[0].polynomePure ^ argPower).integral();
+			if(subLevel[0].matureType & FARG_TYPE_NUMBER)
+			{
+				subLevel[0].polynomePure += subLevel[0].numberPure;
+				subLevel[0].matureType = FARG_TYPE_POLY_NOFACT;
+			}
+			
+			if(subLevel[0].matureType & FARG_TYPE_FACTORISED)
+				polynomePure = (subLevel[0].polynomeFact ^ argPower).integral();
+			else
+			{
+				Polynomial poly = subLevel[0].polynomePure ^ argPower;
+				polynomePure = poly.integral();
+			}
 			break;
 		}
 			

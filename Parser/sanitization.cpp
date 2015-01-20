@@ -160,8 +160,16 @@ void checkString(std::string input)
 		}
 	}
 
-	if(inconsistency)
+	if(inconsistency || parenthesisCount != 0 || bracketCount != 0)
 	{
+		if(!inconsistency)
+		{
+			if(parenthesisCount != 0)
+				parenthesisCount = -1;
+			else
+				bracketCount = -1;
+		}
+		
 		std::stringstream error;
 
 		if(parenthesisCount < 0)

@@ -126,7 +126,10 @@ Entity parseMonome(std::string str)
 			if(sublevel.size() == 1)
 				output = sublevel[0];
 			else
+			{
+				output.wasVar = first.isVar | second.isVar;
 				output.setSublevel(sublevel);
+			}
 		}
 		return output;
 	}

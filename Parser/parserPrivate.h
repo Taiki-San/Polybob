@@ -112,6 +112,7 @@ public:
 	bool initialized;
 
 	bool polyfactOfDegree0;
+	bool wasVar;
 	bool functionArg;
 
 	//Setters
@@ -148,6 +149,7 @@ typedef struct variableContainer
 	Complex::complexN number;
 
 	uint8_t type;
+	bool isVar;
 } VARIABLE;
 
 class Catalog
