@@ -1,26 +1,36 @@
-Polybob is a polynom manager able to manipulate expressions inputed from its shell.
-This project was written as a project for our engineering school
+# PolyBob
 
-# Supported expressions:
+PolyBob is a polynomials manager able to manipulate expressions inputed from its shell.
 
-## Allocation:
+This project was written as part of a work for our engineering school.
+
+##License and credit
+
+All code is released under the [MIT license](http://opensource.org/licenses/MIT). Nonetheless, we use third-party libraries that remain of course under their respective license (see below).
+
+Furthermore even if it's Taiki who handled commits, the software was designed by [mlpo](https://github.com/mlpo) (for the mathematics and algorithms) and [Taiki](https://github.com/TaikiMMT) (for the parser). Matsuharo and [Gregory Le](https://github.com/gregtaole) were also involved in the creation of the user interface.
+
+## Supported expressions:
+
+### Allocation
 `{variable} = expression`
 
-## Compare
+### Compare
 `expression1 == expression2`
 
-## Simple calcul
+### Simple calcul
 `expression`
 
 Parenthesis are supported, variable can be created and used by typing their names between braces.
 Functions can be called by typing their names and putting their arguments between brackets.
 
-# Details
+## Details
 
 -	Unknowns can be either called x or z, but they will be interpreted as z
 -	Spaces are no-op, including inside variable names, {var name} == {varname}
 
-# Compilation
+## Third-party libraries and compilation
 
-Polybob require Boost and linenoise to compile, a copy of both of them is available in the 'Libraries' directory, under their respective licence.
-Makefile and Xcode projects are included, clang is best supported
+PolyBob require [Boost Spirit](www.boost.org/doc/libs/release/libs/spirit/) (under the Boost Software License) and [Linenoise](www.boost.org/doc/libs/release/libs/spirit/) (under the BSD 2-Clause License) to compile, a copy of both of them is available in the "Libraries" directory, under their respective licence.
+
+Makefile and Xcode projects are included, clang is best supported.
