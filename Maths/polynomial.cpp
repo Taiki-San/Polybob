@@ -474,20 +474,8 @@ bool operator==(const Polynomial &lhs, const Polynomial &rhs)
 {
     if(lhs.getNbMonomials() != rhs.getNbMonomials())
         return false;
-
-    listMonomials_t::const_iterator lhsIter = lhs.listMonomials.begin();
-    listMonomials_t::const_iterator rhsIter = rhs.listMonomials.begin();
-
-    while(lhsIter != lhs.listMonomials.end())
-    {
-        if(*lhsIter != *rhsIter)
-            return false;
-
-        ++lhsIter;
-        ++rhsIter;
-    }
-
-    return true;
+	
+    return lhs.toString() == rhs.toString();
 }
 
 bool operator!=(const Polynomial &lhs, const Polynomial &rhs)
@@ -821,4 +809,20 @@ PolyFact Polynomial::factor() const
     }
 
     return PolyFact(factors, this->getHighestMonomial().coeff);
+}
+
+Polynomial& Polynomial::fixFloatPrecision()
+{
+    for(listMonomials_t::iterator iter = listMonomials.begin() ; iter != listMonomials.end() ; ++iter)
+    {
+        if(std::abs(iter->coeff.real()) < 10e-7)
+            iter->coeff = Complex::complexN(0, iter->coeff.imag());
+
+        if(std::abs(iter->coeff.imag()) < 10e-7)
+            iter->coeff = Complex::complexN(iter->coeff.real(), 0);
+    }
+
+    this->removeZeroMonomials();
+
+    return *this;
 }

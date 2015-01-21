@@ -28,6 +28,13 @@ namespace Complex
     template<typename T> inline std::string toString(const std::complex<T> &x, const bool &prefix = false)
     {
         std::ostringstream s;
+		std::complex<T> cpy = x;
+		
+		if(cpy.real() > -1e-15 && cpy.real() < 1e-15)
+			cpy.real(0);
+
+		if(cpy.imag() < 1e-15 && cpy.imag() > -1e-15)
+			cpy.imag(0);
 
         /*
          * On cherche à représenter un nombre complex (de la forme a + bi) sous forme de chaîne.
@@ -52,44 +59,44 @@ namespace Complex
         *    Non préfixé : 0
         *    Préfixé :     + 0
          */
-        if(x.real() != 0 && x.imag() != 0) //Le nombre a une partie réel et une partie imaginaire
+        if(cpy.real() != 0 && cpy.imag() != 0) //Le nombre a une partie réel et une partie imaginaire
         {
             if(prefix)
                 s << "+ ";
 
-            s << "(" << x.real();
+            s << "(" << cpy.real();
 
             //On ajoute le signe de la partie imaginaire
-            if(x.imag() > 0)
+            if(cpy.imag() > 0)
                 s << " + ";
             else
                 s << " - ";
 
             //On ajoute la partie imaginaire (sans son signe qui est déjà présent)
-            if(std::abs(x.imag()) != 1)
-                s << std::abs(x.imag());
+            if(std::abs(cpy.imag()) != 1)
+                s << std::abs(cpy.imag());
 
             s << "i)";
         }
-        else if(x.real() != 0 && x.imag() == 0) //Le nombre a juste une partie réel
+        else if(cpy.real() != 0 && cpy.imag() == 0) //Le nombre a juste une partie réel
         {
-            if(prefix && x.real() > 0)
+            if(prefix && cpy.real() > 0)
                 s << "+ ";
 
-            if(x.real() < 0)
+            if(cpy.real() < 0)
                 s << "- ";
 
-            s << std::abs(x.real());
+            s << std::abs(cpy.real());
         }
-        else if(x.real() == 0 && x.imag() != 0) //Le nombre a juste une partie imaginaire
+        else if(cpy.real() == 0 && cpy.imag() != 0) //Le nombre a juste une partie imaginaire
         {
-            if(prefix && x.imag() > 0)
+            if(prefix && cpy.imag() > 0)
                 s << "+ ";
 
-            if(x.imag() < 0)
+            if(cpy.imag() < 0)
                 s << "- ";
 
-            s << std::abs(x.imag()) << "i";
+            s << std::abs(cpy.imag()) << "i";
         }
         else //Le nombre est nul
         {

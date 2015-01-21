@@ -53,6 +53,13 @@ bool operator!=(const Monomial &lhs, const Monomial &rhs)
 std::string Monomial::toString(const bool &prefix) const
 {
     std::ostringstream s;
+	Complex::complexN cpy = coeff;
+	
+	if(cpy.real() > -1e-15 && cpy.real() < 1e-15)
+		cpy.real(0);
+	
+	if(cpy.imag() < 1e-15 && cpy.imag() > -1e-15)
+		cpy.imag(0);
 
     /*
      * On cherche à représenter un nombre complex (de la forme a + bi) sous forme de chaîne.
@@ -82,31 +89,31 @@ std::string Monomial::toString(const bool &prefix) const
     //Par exemple, avec prefix = false, le monôme (0,-4) devrait devenir "- 4i", mais devient actuellement
     // " - 4i" (une espace en trop)
     //N.B. : le problème n’est pas cantonné au imaginaires pures
-    if(coeff.real() != 0 && coeff.imag() != 0) //Le nombre a une partie réel et une partie imaginaire
+    if(cpy.real() != 0 && cpy.imag() != 0) //Le nombre a une partie réel et une partie imaginaire
     {
         if(prefix)
             s << " + ";
 
-        s << "(" << coeff.real();
+        s << "(" << cpy.real();
 
         //On ajoute le signe de la partie imaginaire
-        if(coeff.imag() > 0)
+        if(cpy.imag() > 0)
             s << " + ";
         else
             s << " - ";
 
         //On ajoute la partie imaginaire (sans son signe qui est déjà présent)
-        if(std::abs(coeff.imag()) != 1)
-            s << std::abs(coeff.imag());
+        if(std::abs(cpy.imag()) != 1)
+            s << std::abs(cpy.imag());
 
         s << "i)";
     }
-    else if(coeff.real() != 0 && coeff.imag() == 0) //Le nombre a juste une partie réel
+    else if(cpy.real() != 0 && cpy.imag() == 0) //Le nombre a juste une partie réel
     {
-        if(prefix && coeff.real() > 0)
+        if(prefix && cpy.real() > 0)
             s << " + ";
 
-        if(coeff.real() < 0)
+        if(cpy.real() < 0)
             s << " - ";
 
         /*
@@ -116,22 +123,22 @@ std::string Monomial::toString(const bool &prefix) const
          * Ou si la partie réelle n’est pas une unité : il faut afficher la partie réelle car
          * elle ne vaut pas 1 (ou -1).
          */
-        if(power == 0 || std::abs(coeff.real()) != 1)
-            s << std::abs(coeff.real());
+        if(power == 0 || std::abs(cpy.real()) != 1)
+            s << std::abs(cpy.real());
     }
-    else if(coeff.real() == 0 && coeff.imag() != 0) //Le nombre a juste une partie imaginaire
+    else if(cpy.real() == 0 && cpy.imag() != 0) //Le nombre a juste une partie imaginaire
     {
-        if(prefix && coeff.imag() > 0)
+        if(prefix && cpy.imag() > 0)
             s << " + ";
 
-        if(coeff.imag() < 0)
+        if(cpy.imag() < 0)
             s << " - ";
 
         /*
          * Même remarque (voire ci-dessus) avec la partie imaginaire
          */
-        if(power == 0 || std::abs(coeff.imag()) != 1)
-            s << std::abs(coeff.imag());
+        if(power == 0 || std::abs(cpy.imag()) != 1)
+            s << std::abs(cpy.imag());
 
         s << "i";
     }

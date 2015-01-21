@@ -84,6 +84,8 @@ public:
     vectorRoots_t getRoots() const;
     PolyFact factor() const;
 
+    Polynomial& fixFloatPrecision();
+
 private:
     listMonomials_t listMonomials;
 
