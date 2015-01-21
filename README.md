@@ -8,7 +8,7 @@ This project was written as part of a work for our engineering school.
 
 All code is released under the [MIT license](http://opensource.org/licenses/MIT). Nonetheless, we use third-party libraries that remain of course under their respective license (see below).
 
-Furthermore even if it's Taiki who handled commits, the software was designed by [mlpo](https://github.com/mlpo) (for the mathematics and algorithms) and [Taiki](https://github.com/TaikiMMT) (for the parser). Matsuharo and [Gregory Le](https://github.com/gregtaole) were also involved in the creation of the user interface.
+Furthermore even if Taiki handled commits, the software was designed by [mlpo](https://github.com/mlpo) (mathematics and algorithms) and [Taiki](https://github.com/TaikiMMT) (parser and solver). Matsuharo and [Gregory Le](https://github.com/gregtaole) were also involved in the creation of the user interface.
 
 ## Supported expressions:
 
