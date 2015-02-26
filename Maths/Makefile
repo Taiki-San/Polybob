@@ -1,3 +1,6 @@
+CC = clang++
+FLAGS  = -O2 -c
+
 all:
 	$(CC) $(FLAGS) -o ../obj/factor.o factor.cpp
 	$(CC) $(FLAGS) -o ../obj/monomial.o monomial.cpp
