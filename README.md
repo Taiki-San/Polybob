@@ -4,11 +4,11 @@ PolyBob is a polynomials manager able to manipulate expressions inputed from its
 
 This project was written as part of a work for our engineering school.
 
-##License and credit
+## License and credit
 
 All code is released under the [MIT license](http://opensource.org/licenses/MIT). Nonetheless, we use third-party libraries that remain of course under their respective license (see below).
 
-Furthermore even if Taiki handled commits, the software was designed by [mlpo](https://github.com/mlpo) (mathematics and algorithms) and [Taiki](https://github.com/Taiki-San) (parsing and evaluation). Matsuharo and [Gregory Le](https://github.com/gregtaole) were also involved in the creation of the user interface (CLI).
+Furthermore even if Taiki handled commits, the software was designed by [mlpo](https://github.com/mlpo) (mathematics and algorithms), [Taiki](https://github.com/Taiki-San) (parsing and evaluation), Matsuharo (CLI) and [Gregory Le](https://github.com/gregtaole) (CLI).
 
 ## Supported expressions:
 
